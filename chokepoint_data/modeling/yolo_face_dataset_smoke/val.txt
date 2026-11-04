@@ -1,0 +1,12 @@
+D:\Admin\Download\DSP391m\chokepoint_data\modeling\yolo_face_dataset_smoke\images\val\P1L_S4_C1_00002567.jpg
+D:\Admin\Download\DSP391m\chokepoint_data\modeling\yolo_face_dataset_smoke\images\val\P1L_S4_C1_00003129.jpg
+D:\Admin\Download\DSP391m\chokepoint_data\modeling\yolo_face_dataset_smoke\images\val\P1E_S3_C3_00003316.jpg
+D:\Admin\Download\DSP391m\chokepoint_data\modeling\yolo_face_dataset_smoke\images\val\P1L_S3_C3_00003675.jpg
+D:\Admin\Download\DSP391m\chokepoint_data\modeling\yolo_face_dataset_smoke\images\val\P1E_S4_C1_00000830.jpg
+D:\Admin\Download\DSP391m\chokepoint_data\modeling\yolo_face_dataset_smoke\images\val\P1L_S3_C3_00003509.jpg
+D:\Admin\Download\DSP391m\chokepoint_data\modeling\yolo_face_dataset_smoke\images\val\P1E_S4_C1_00002544.jpg
+D:\Admin\Download\DSP391m\chokepoint_data\modeling\yolo_face_dataset_smoke\images\val\P1L_S4_C1_00001454.jpg
+D:\Admin\Download\DSP391m\chokepoint_data\modeling\yolo_face_dataset_smoke\images\val\P1L_S3_C3_00003703.jpg
+D:\Admin\Download\DSP391m\chokepoint_data\modeling\yolo_face_dataset_smoke\images\val\P1E_S3_C3_00002191.jpg
+D:\Admin\Download\DSP391m\chokepoint_data\modeling\yolo_face_dataset_smoke\images\val\P1E_S3_C3_00002893.jpg
+D:\Admin\Download\DSP391m\chokepoint_data\modeling\yolo_face_dataset_smoke\images\val\P1L_S4_C1_00004646.jpg

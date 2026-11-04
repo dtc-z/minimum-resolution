@@ -1,0 +1,155 @@
+{
+  "mode": "all",
+  "files": [
+    {
+      "filename": "P1E.tar.xz",
+      "url": "https://zenodo.org/api/records/815657/files/P1E.tar.xz/content",
+      "size": 66406324,
+      "md5": "07203fe0de5ebb1270742bd711f11dd8"
+    },
+    {
+      "filename": "P1E_S1.tar.xz",
+      "url": "https://zenodo.org/api/records/815657/files/P1E_S1.tar.xz/content",
+      "size": 385315324,
+      "md5": "195191772856c1a62650a1d47e897b2a"
+    },
+    {
+      "filename": "P1E_S2.tar.xz",
+      "url": "https://zenodo.org/api/records/815657/files/P1E_S2.tar.xz/content",
+      "size": 402244872,
+      "md5": "bc58ad9ef36ceb92da592cb092353d55"
+    },
+    {
+      "filename": "P1E_S3.tar.xz",
+      "url": "https://zenodo.org/api/records/815657/files/P1E_S3.tar.xz/content",
+      "size": 424074200,
+      "md5": "8f0c55f28905cb922f4f6513d55c2646"
+    },
+    {
+      "filename": "P1E_S4.tar.xz",
+      "url": "https://zenodo.org/api/records/815657/files/P1E_S4.tar.xz/content",
+      "size": 401106492,
+      "md5": "44516946b1d19c14f5b129a27492fb51"
+    },
+    {
+      "filename": "P1L.tar.xz",
+      "url": "https://zenodo.org/api/records/815657/files/P1L.tar.xz/content",
+      "size": 92345768,
+      "md5": "47c253a7ad45b379222472aed72d3de7"
+    },
+    {
+      "filename": "P1L_S1.tar.xz",
+      "url": "https://zenodo.org/api/records/815657/files/P1L_S1.tar.xz/content",
+      "size": 725701368,
+      "md5": "5673a77c62b4e70d0f6871d1635df367"
+    },
+    {
+      "filename": "P1L_S2.tar.xz",
+      "url": "https://zenodo.org/api/records/815657/files/P1L_S2.tar.xz/content",
+      "size": 777377176,
+      "md5": "58cebfdd0d1ae5e4a62aa726f5f6fd85"
+    },
+    {
+      "filename": "P1L_S3.tar.xz",
+      "url": "https://zenodo.org/api/records/815657/files/P1L_S3.tar.xz/content",
+      "size": 845105084,
+      "md5": "cd54163ad2f3ae275767468ebe0a8f29"
+    },
+    {
+      "filename": "P1L_S4.tar.xz",
+      "url": "https://zenodo.org/api/records/815657/files/P1L_S4.tar.xz/content",
+      "size": 787250640,
+      "md5": "0a6c8e1dab78ed8c15d013845f0bf49b"
+    },
+    {
+      "filename": "P2E.tar.xz",
+      "url": "https://zenodo.org/api/records/815657/files/P2E.tar.xz/content",
+      "size": 85541884,
+      "md5": "bd0cd0719b625f4927e9450a9053d8d1"
+    },
+    {
+      "filename": "P2E_S1.tar.xz",
+      "url": "https://zenodo.org/api/records/815657/files/P2E_S1.tar.xz/content",
+      "size": 571516684,
+      "md5": "eaab899f03df2bebc0864e4f5ff3a799"
+    },
+    {
+      "filename": "P2E_S2.tar.xz",
+      "url": "https://zenodo.org/api/records/815657/files/P2E_S2.tar.xz/content",
+      "size": 576111076,
+      "md5": "cc464106ef29e363b67fdfbfd5e25ed9"
+    },
+    {
+      "filename": "P2E_S3.tar.xz",
+      "url": "https://zenodo.org/api/records/815657/files/P2E_S3.tar.xz/content",
+      "size": 979973888,
+      "md5": "24e77e3b6dad281e867017b008c4ee86"
+    },
+    {
+      "filename": "P2E_S4.tar.xz",
+      "url": "https://zenodo.org/api/records/815657/files/P2E_S4.tar.xz/content",
+      "size": 933293988,
+      "md5": "478d22bd2f18307ceb7151bb198318a3"
+    },
+    {
+      "filename": "P2E_S5.tar.xz",
+      "url": "https://zenodo.org/api/records/815657/files/P2E_S5.tar.xz/content",
+      "size": 180516452,
+      "md5": "e6bca312e40ebebdfb709f2315eebf80"
+    },
+    {
+      "filename": "P2L.tar.xz",
+      "url": "https://zenodo.org/api/records/815657/files/P2L.tar.xz/content",
+      "size": 89060244,
+      "md5": "4411e2b3d798e5c3ebc8c8f1837636f3"
+    },
+    {
+      "filename": "P2L_S1.tar.xz",
+      "url": "https://zenodo.org/api/records/815657/files/P2L_S1.tar.xz/content",
+      "size": 744449136,
+      "md5": "11cddc4b3e5d0c6fdcd72430f6a9023c"
+    },
+    {
+      "filename": "P2L_S2.tar.xz",
+      "url": "https://zenodo.org/api/records/815657/files/P2L_S2.tar.xz/content",
+      "size": 734250832,
+      "md5": "032c7c0707b02079616fae27b468daeb"
+    },
+    {
+      "filename": "P2L_S3.tar.xz",
+      "url": "https://zenodo.org/api/records/815657/files/P2L_S3.tar.xz/content",
+      "size": 741026188,
+      "md5": "8c88d48efae3958a6a74fccae06c05b9"
+    },
+    {
+      "filename": "P2L_S4.tar.xz",
+      "url": "https://zenodo.org/api/records/815657/files/P2L_S4.tar.xz/content",
+      "size": 728674324,
+      "md5": "8e656c89fb3925999921208ce65b6f70"
+    },
+    {
+      "filename": "P2L_S5.tar.xz",
+      "url": "https://zenodo.org/api/records/815657/files/P2L_S5.tar.xz/content",
+      "size": 143729848,
+      "md5": "14b28f3d83a75b62d3aa6ad5ee117843"
+    },
+    {
+      "filename": "README.txt",
+      "url": "https://zenodo.org/api/records/815657/files/README.txt/content",
+      "size": 1446,
+      "md5": "dfdc23d2934fc07b63ecf391d85db9dd"
+    },
+    {
+      "filename": "Still.tar.xz",
+      "url": "https://zenodo.org/api/records/815657/files/Still.tar.xz/content",
+      "size": 294532420,
+      "md5": "2efcd4010d19e811cce144a614ea82a2"
+    },
+    {
+      "filename": "groundtruth.tar.xz",
+      "url": "https://zenodo.org/api/records/815657/files/groundtruth.tar.xz/content",
+      "size": 456396,
+      "md5": "5c9d4d38a1c614905fe48da48ecdf06c"
+    }
+  ]
+}

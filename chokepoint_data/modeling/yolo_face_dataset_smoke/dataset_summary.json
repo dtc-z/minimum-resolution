@@ -1,0 +1,24 @@
+{
+  "dataset_root": "D:\\Admin\\Download\\DSP391m\\chokepoint_data\\modeling\\yolo_face_dataset_smoke",
+  "yaml": "D:\\Admin\\Download\\DSP391m\\chokepoint_data\\modeling\\yolo_face_dataset_smoke\\chokepoint_face.yaml",
+  "train_limit": 24,
+  "val_limit": 12,
+  "train": {
+    "split": "train",
+    "rows": 24,
+    "missing_images": 0,
+    "hardlinks": 24,
+    "copies": 0,
+    "existing": 0,
+    "image_list": "chokepoint_data\\modeling\\yolo_face_dataset_smoke\\train.txt"
+  },
+  "val": {
+    "split": "val",
+    "rows": 12,
+    "missing_images": 0,
+    "hardlinks": 12,
+    "copies": 0,
+    "existing": 0,
+    "image_list": "chokepoint_data\\modeling\\yolo_face_dataset_smoke\\val.txt"
+  }
+}

@@ -1,0 +1,18 @@
+{
+  "dataset": "ChokePoint P1 indoor frontal Case Study 1",
+  "detector": "InsightFace buffalo_l SCRFD det_10g.onnx",
+  "device": "CPUExecutionProvider",
+  "sample_size": 600,
+  "confidence_threshold": 0.5,
+  "iou_threshold": 0.5,
+  "tp": 598,
+  "fp": 7,
+  "fn": 2,
+  "precision": 0.9884,
+  "recall": 0.9967,
+  "f1": 0.9925,
+  "ap50_voc101": 0.9871,
+  "mean_matched_iou": 0.6236,
+  "elapsed_seconds": 40.86,
+  "predictions": 605
+}

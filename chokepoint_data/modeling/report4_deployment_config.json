@@ -1,0 +1,26 @@
+{
+  "recommended_default": {
+    "detector": "YOLOv8n-FT",
+    "weights": "chokepoint_data\\modeling\\yolo_finetuned_full_gpu_weights\\yolov8n_face.pt",
+    "frame_width": 320,
+    "frame_height": 240,
+    "confidence_threshold": 0.25,
+    "iou_threshold": 0.5,
+    "expected_full_eval": {
+      "ap50": 0.9901,
+      "recall": 0.9967,
+      "precision": 0.9996,
+      "fps": 69.0
+    }
+  },
+  "minimum_viable": {
+    "detector": "YOLOv8n-FT",
+    "frame_width": 288,
+    "frame_height": 216,
+    "condition": "Use only when compute pressure is high and the scene is similar to ChokePoint Portal 1 indoor frontal."
+  },
+  "fallback_low_resolution": {
+    "detector": "SCRFD",
+    "condition": "Consider when frames are heavily downsampled, but monitor false positives and latency."
+  }
+}

@@ -1,0 +1,31 @@
+@'
+# Dataset đã giải nén
+/chokepoint_data/extracted/
+
+# Checkpoints và model weights
+*.pt
+*.pth
+*.onnx
+*.engine
+
+# Kết quả huấn luyện và cache
+/runs/
+/chokepoint_data/modeling/yolo_face_dataset/
+/chokepoint_data/modeling/yolo_finetuned*_weights/
+/chokepoint_data/modeling/yolo_finetune*_runs/
+*.cache
+
+# File lớn đã phát hiện khi quét
+/results.zip
+/chokepoint_data/modeling/benchmark_full_eval_gpu_yolo_both_scrfd_predictions_sample5676.csv
+/chokepoint_data/modeling/benchmark_*_predictions_*.csv
+
+# Log
+*.log
+
+# Môi trường và file tạm
+.venv/
+venv/
+__pycache__/
+.ipynb_checkpoints/
+'@ | Set-Content -Encoding utf8 .gitignore
