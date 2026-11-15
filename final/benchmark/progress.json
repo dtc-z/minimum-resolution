@@ -1,5 +1,5 @@
 ﻿{
-    "updated_utc":  "2026-11-15T07:07:41Z",
+    "updated_utc":  "2026-11-15T10:45:38Z",
     "phase":  "complete",
     "model":  "SCRFD-500M-FT",
     "resolution_width":  128,
@@ -15,12 +15,12 @@
     "selection_confidence":  0.25,
     "selection_dev_ap50":  0.9900902090209021,
     "selection_dev_recall":  0.9629955947136564,
-    "note":  "Test sweep, summaries, corrected figures, and final DOCX build completed. Manual box audit and user author edits remain pending; inspect final pagination in Word.",
+    "note":  "Test sweep, summaries, corrected figures, and final DOCX rebuilt with the updated latest-manual-box audit. The user-designated boxes_only_240.csv is the audit reference; its coordinates match the InsightFace proposal file. User author edits and final Word pagination review remain pending.",
     "speed_repeat":  5,
     "speed_repeats_total":  5,
     "last_width_speed_median_fps":  69.099,
     "figure_png_review":  "complete",
     "word_render_review":  "pending",
-    "manual_box_audit":  "pending_human_annotation",
+    "manual_box_audit":  "complete_latest_user_designated_boxes_only_240",
     "author_info_edit":  "user_will_edit_docx"
 }

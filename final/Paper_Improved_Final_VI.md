@@ -7,7 +7,7 @@
 
 ## Tóm tắt
 
-Nghiên cứu này đo lường sự đánh đổi giữa độ phân giải đầu vào, độ chính xác phát hiện và thông lượng ở cấp độ bộ phát hiện trên video ChokePoint Portal 1, cảnh chính diện trong nhà. Chúng tôi chia dữ liệu theo toàn bộ chuỗi, gồm 4.900 khung hình huấn luyện, 1.135 khung hình phát triển và 5.676 khung hình kiểm thử được giữ riêng; sau đó so sánh các mô hình YOLOv5nu, YOLOv8n, YOLOv12n và SCRFD-500M đã tinh chỉnh. Phép đánh giá quét mười độ rộng đầu vào từ 640 đến 128 pixel và sáu ngưỡng tin cậy; việc chọn điểm vận hành chỉ dùng tập phát triển. Quy tắc dựa trên tập phát triển chọn YOLOv8n-FT ở độ rộng 288 pixel. Trên tập kiểm thử đã khóa, cấu hình này đạt AP50 1,000, recall 0,998 và thông lượng trung vị 72,1 khung hình/giây theo hộp suy ra từ mốc mắt. Trên 240 hộp vẽ tay, cùng cấu hình đạt AP50 1,000 và recall 0,996. Các hộp vẽ tay trùng hoàn toàn với hộp suy ra trong mẫu này (IoU=1,000), nên phép kiểm toán không tạo ra phép đo độc lập về sai lệch nhãn. Nghiên cứu không đo độ chính xác nhận dạng danh tính hay hiệu năng toàn pipeline.
+Nghiên cứu này đo lường sự đánh đổi giữa độ phân giải đầu vào, độ chính xác phát hiện và thông lượng ở cấp độ bộ phát hiện trên video ChokePoint Portal 1, cảnh chính diện trong nhà. Chúng tôi chia dữ liệu theo toàn bộ chuỗi, gồm 4.900 khung hình huấn luyện, 1.135 khung hình phát triển và 5.676 khung hình kiểm thử được giữ riêng; sau đó so sánh các mô hình YOLOv5nu, YOLOv8n, YOLOv12n và SCRFD-500M đã tinh chỉnh. Phép đánh giá quét mười độ rộng đầu vào từ 640 đến 128 pixel và sáu ngưỡng tin cậy; việc chọn điểm vận hành chỉ dùng tập phát triển. Quy tắc dựa trên tập phát triển chọn YOLOv8n-FT ở độ rộng 288 pixel. Trên tập kiểm thử đã khóa, cấu hình này đạt AP50 1,000, recall 0,998 và thông lượng trung vị 72,1 khung hình/giây theo hộp suy ra từ mốc mắt. Trên bộ hộp thủ công mới nhất gồm 240 ảnh, cấu hình này đạt AP50 0,944 và recall 0,954; IoU trung vị so với hộp suy ra là 0,625. Tọa độ bộ hộp thủ công trùng với tệp đề xuất InsightFace trên cả 240 ảnh, nên kết quả này không phải đối chiếu độc lập với các đề xuất đó. Nghiên cứu không đo độ chính xác nhận dạng danh tính hay hiệu năng toàn pipeline.
 
 **Từ khóa—** phát hiện khuôn mặt, giám sát video, ChokePoint, giảm độ phân giải, thông lượng, YOLO, SCRFD.
 
@@ -46,7 +46,7 @@ Tổng cộng có 4.900 khung hình huấn luyện, 1.135 khung hình phát tri�
 
 ChokePoint cung cấp mốc mắt được gán nhãn thủ công thay vì hình chữ nhật cho bộ phát hiện. Với khoảng cách giữa hai mắt là *d* và trung điểm hai mắt là (*cx*, *cy*), hộp đại diện được tính như sau: x1=cx−1,4d; x2=cx+1,4d; y1=cy−1,2d; y2=cy+2,4d. Tọa độ được cắt theo biên khung hình 800×600. Các hộp xác định bằng công thức này là nhãn đại diện, tách biệt với hộp vẽ tay.
 
-Tác giả vẽ một hộp khuôn mặt cho mỗi 240 khung hình test, phân tầng theo bốn chuỗi và ba nhóm khoảng cách giữa hai mắt. Các hộp này được giữ riêng và dùng cho một phép kiểm toán thứ cấp; chúng không tham gia chọn mô hình hay điểm vận hành. Không có người gán nhãn thứ hai hoặc bước phân xử được ghi nhận.
+Bộ hộp thủ công mới nhất trong `boxes_only_240.csv` có một hộp cho mỗi 240 khung hình test, cân bằng theo bốn chuỗi và ba nhóm khoảng cách giữa hai mắt. Theo xác nhận của người dùng, các tọa độ này được vẽ thủ công. Các hộp được giữ riêng và chỉ dùng cho phép kiểm toán thứ cấp; chúng không tham gia chọn mô hình hay điểm vận hành. Tọa độ của cả 240 hộp trùng với tệp đề xuất InsightFace đi kèm, nên kết quả đối chiếu không độc lập với các đề xuất này. Không có người gán nhãn thứ hai hoặc bước phân xử được ghi nhận.
 
 Để giảm công rà soát thủ công, một bộ hộp tham chiếu giả lập riêng được tạo từ dự đoán của SCRFD-10GF tiền huấn luyện và YuNet trên cùng 240 khung hình. Khi hai hộp được chọn có IoU ít nhất 0,50 và mỗi detector chỉ trả về một khuôn mặt, tọa độ được lấy trung bình (164 ảnh). Với 76 ảnh còn lại có bất đồng hoặc nhiều khuôn mặt, hộp YuNet lớn nhất được giữ làm nhãn tạm và gắn cờ cần xem lại. Đây là hộp do mô hình tạo, không phải ground truth do người xác nhận.
 
@@ -83,16 +83,18 @@ Chỉ dùng dữ liệu phát triển, quy tắc đã định trước khóa c�
 
 Hình 1 cho thấy AP50 và recall theo độ rộng ở confidence 0,25. Hình 2 báo cáo thông lượng ở từng độ phân giải trên cùng mẫu đo tốc độ cố định. Hình 3 thể hiện precision, recall và F1 theo ngưỡng tin cậy cho cấu hình được khóa từ tập phát triển. Các đường này hỗ trợ phân tích đánh đổi theo giao thức cụ thể; chúng không chứng minh một kiến trúc nói chung vượt trội hơn.
 
-**Bảng III. Kết quả trên 240 hộp vẽ tay ở độ rộng 288 pixel. AP50 dùng confidence tối thiểu 0,001; precision, recall và F1 dùng confidence 0,25.**
+### C. Kiểm toán hộp thủ công
+
+**Bảng III. Kết quả trên bộ hộp thủ công mới nhất gồm 240 ảnh ở độ rộng 288 pixel. AP50 dùng confidence tối thiểu 0,001; precision, recall và F1 dùng confidence 0,25.**
 
 | Mô hình | AP50 | Precision | Recall | F1 |
 |---|---:|---:|---:|---:|
-| YOLOv5nu-FT | 1,000 | 1,000 | 0,983 | 0,992 |
-| YOLOv8n-FT | 1,000 | 1,000 | 0,996 | 0,998 |
-| YOLOv12n-FT | 0,980 | 1,000 | 0,958 | 0,979 |
-| SCRFD-500M-FT | 0,861 | 0,965 | 0,808 | 0,880 |
+| YOLOv5nu-FT | 0,965 | 0,983 | 0,967 | 0,975 |
+| YOLOv8n-FT | 0,944 | 0,958 | 0,954 | 0,956 |
+| YOLOv12n-FT | 0,948 | 0,983 | 0,942 | 0,962 |
+| SCRFD-500M-FT | 0,286 | 0,443 | 0,371 | 0,404 |
 
-Trong cả 240 ảnh, IoU giữa hộp vẽ tay và hộp suy ra từ mốc mắt bằng 1,000 (IQR 1,000–1,000). Vì hai tập hộp trùng tọa độ trong mẫu này, phép kiểm toán không cung cấp đánh giá độc lập về độ lệch của nhãn đại diện. AP50 dùng confidence tối thiểu 0,001; precision, recall và F1 dùng confidence 0,25.
+IoU giữa bộ hộp thủ công và hộp suy ra có trung bình 0,625, trung vị 0,625 (IQR 0,593–0,654); 239/240 cặp đạt IoU ít nhất 0,50. Bộ hộp thủ công trùng tọa độ với các đề xuất InsightFace trên cả 240 ảnh, nên kết quả là phép so sánh mô tả, không phải xác thực độc lập các đề xuất đó. AP50 dùng confidence tối thiểu 0,001; precision, recall và F1 dùng confidence 0,25.
 
 ### D. Kiểm tra độ nhạy với pseudo-label do mô hình tạo
 
@@ -117,11 +119,11 @@ Các điểm số này đo mức phù hợp với hộp tham chiếu do mô hìn
 
 ### A. Diễn giải
 
-Độ phân giải làm thay đổi cả chất lượng phát hiện lẫn khối lượng xử lý của detector trong điều kiện biến đổi ảnh và phần cứng đã nêu. Kết quả được khóa từ tập phát triển cung cấp một điểm vận hành có thể tái lập khi thỏa các ràng buộc AP50 và recall đã đặt trước. Toàn bộ sweep test dựa trên hộp suy ra; phép kiểm toán 240 hộp vẽ tay cho kết quả tương tự nhưng các tọa độ trùng hoàn toàn với hộp đại diện. Các kết quả cần được diễn giải trong bối cảnh nhãn, công thức huấn luyện riêng của từng mô hình và GPU đã đo. AP50 gần 1 không có nghĩa phát hiện khuôn mặt hay nhận dạng hoàn hảo.
+Độ phân giải làm thay đổi cả chất lượng phát hiện lẫn khối lượng xử lý của detector trong điều kiện biến đổi ảnh và phần cứng đã nêu. Kết quả được khóa từ tập phát triển cung cấp một điểm vận hành có thể tái lập khi thỏa các ràng buộc AP50 và recall đã đặt trước. Sweep test chính được đánh giá bằng hộp suy ra; phép kiểm toán trên 240 hộp thủ công cho một đối chiếu phụ nhưng bộ hộp này trùng với các đề xuất InsightFace. Các kết quả cần được diễn giải trong bối cảnh nhãn, nguồn của bộ hộp phụ, công thức huấn luyện riêng của từng mô hình và GPU đã đo. AP50 gần 1 không có nghĩa phát hiện khuôn mặt hay nhận dạng hoàn hảo.
 
 ### B. Hạn chế và hướng nghiên cứu tiếp
 
-Sweep độ phân giải chính dùng hộp suy ra từ mốc mắt; kiểm toán hộp vẽ tay chỉ gồm 240 khung hình do một người gán nhãn, không có độ nhất trí liên gán nhãn hay phân xử. Các hộp thủ công trùng tọa độ với hộp suy ra trong mẫu này, nên chưa thể xem đây là xác thực độc lập. Thí nghiệm chỉ bao phủ các chuỗi cảnh chính diện trong nhà tại Portal 1 và một GPU laptop RTX 3050; kết quả không xác lập khả năng khái quát sang cổng khác, ngoài trời, tình huống che khuất, danh tính tách biệt hay phần cứng khác. Nghiên cứu không đo độ chính xác nhận dạng phía sau, tải khi có nhiều khuôn mặt hay độ trễ toàn pipeline. Công việc tiếp theo cần gán nhãn độc lập và phân xử, đánh giá thêm cổng và phần cứng, đồng thời đo toàn bộ pipeline từ phát hiện đến nhận dạng.
+Sweep độ phân giải chính dùng hộp suy ra từ mốc mắt; bộ hộp thủ công phụ chỉ gồm 240 khung hình do một người gán nhãn, không có độ nhất trí liên gán nhãn hay phân xử. Tọa độ của bộ này trùng hoàn toàn với đề xuất InsightFace, nên không thể xem phép so sánh là xác thực độc lập đối với các đề xuất đó. Thí nghiệm chỉ bao phủ các chuỗi cảnh chính diện trong nhà tại Portal 1 và một GPU laptop RTX 3050; kết quả không xác lập khả năng khái quát sang cổng khác, ngoài trời, tình huống che khuất, danh tính tách biệt hay phần cứng khác. Nghiên cứu không đo độ chính xác nhận dạng phía sau, tải khi có nhiều khuôn mặt hay độ trễ toàn pipeline. Công việc tiếp theo cần gán nhãn độc lập và phân xử, đánh giá thêm cổng và phần cứng, đồng thời đo toàn bộ pipeline từ phát hiện đến nhận dạng.
 
 ### C. Kết luận
 

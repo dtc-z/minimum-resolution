@@ -133,8 +133,8 @@ def make_abstract(summary: pd.DataFrame, selection: dict, manual_summary: pd.Dat
         selected_result = (
             f"The development-only rule selected {model} at {width} pixels. On the locked test set, "
             f"this setting obtained average precision at IoU 0.50 (AP50) {row['ap50_vs_derived_boxes']:.3f}, recall {row['recall']:.3f}, "
-            f"and median throughput {row['fps_median']:.1f} frames per second. Against hand-drawn boxes on a "
-            f"stratified 240-frame test audit, the same setting obtained AP50 {audit_row['ap50']:.3f} and "
+            f"and median throughput {row['fps_median']:.1f} frames per second. Against the latest user-designated "
+            f"hand-drawn boxes on 240 test frames, the same setting obtained AP50 {audit_row['ap50']:.3f} and "
             f"recall {audit_row['recall']:.3f}."
         )
     else:
@@ -149,7 +149,7 @@ def make_abstract(summary: pd.DataFrame, selection: dict, manual_summary: pd.Dat
         "YOLOv5nu, YOLOv8n, YOLOv12n, and SCRFD-500M. Evaluation sweeps ten input widths from 640 to "
         "128 pixels and six confidence thresholds; operating-point selection uses development data only. "
         + selected_result
-        + f" The median IoU between hand-drawn and landmark-derived boxes was "
+        + f" The median IoU between the hand-drawn and landmark-derived boxes was "
         f"{manual_stats['manual_vs_proxy_iou']['50%']:.3f}. The benchmark and audit describe detector "
         "performance on one portal and GPU; they do not measure identity recognition "
         "or end-to-end pipeline performance."
@@ -162,8 +162,8 @@ def main() -> None:
     parser.add_argument("--summary", default="chokepoint_data/modeling/final_revision/benchmark/summary.csv")
     parser.add_argument("--selection", default="chokepoint_data/modeling/final_revision/benchmark/operating_point_dev_locked.json")
     parser.add_argument("--figures", default="chokepoint_data/modeling/final_revision/figures")
-    parser.add_argument("--manual-summary", default="final/benchmark/manual_box_audit/manual_box_summary.csv")
-    parser.add_argument("--manual-stats", default="final/benchmark/manual_box_audit/manual_box_summary.json")
+    parser.add_argument("--manual-summary", default="final/benchmark/manual_box_audit_latest/manual_box_summary.csv")
+    parser.add_argument("--manual-stats", default="final/benchmark/manual_box_audit_latest/manual_box_summary.json")
     parser.add_argument("--pseudo-summary", default="final/benchmark/pseudo_box_audit/pseudo_box_summary.csv")
     parser.add_argument("--out", default="docs/Paper_Improved_Final.docx")
     args = parser.parse_args()
@@ -277,10 +277,11 @@ def main() -> None:
         "boundaries. Reported AP50, precision, recall, and F1 therefore measure agreement with this proxy "
         "label construction, not localization against manually annotated face rectangles.")
     add_body(template,
-        "The user hand-drew one face box for each of 240 test frames, sampled evenly across four test sequences "
-        "and three eye-distance strata. These reference boxes are preserved separately from the proxy labels. "
-        "The manual sample is used for a secondary audit only; it does not change model or operating-point "
-        "selection. No second annotator or adjudication was recorded.")
+        "The latest user-designated hand-drawn file, boxes_only_240.csv, contains one box for each of 240 test frames, sampled evenly "
+        "across four test sequences and three eye-distance strata. The file is used only as a secondary reference "
+        "and does not change model or operating-point selection. Its coordinates exactly match the accompanying "
+        "InsightFace proposal file, so this comparison is not an independent check against that model output. "
+        "No second annotator or adjudication was recorded.")
     add_body(template,
         "To reduce manual review effort, a separate pseudo-reference set was formed from pretrained SCRFD-10GF "
         "and OpenCV Zoo YuNet proposals on the same 240 frames. When both selected boxes agreed at IoU 0.50 "
@@ -388,10 +389,12 @@ def main() -> None:
               [1.35, 0.48, 0.68, 0.5, 0.42])
     agreement = manual_stats["manual_vs_proxy_iou"]
     add_body(template,
-        f"The hand-drawn sample covers 240 frames. Median IoU between manual boxes and the "
-        f"landmark-derived proxies was {agreement['50%']:.3f} (IQR {agreement['25%']:.3f}–{agreement['75%']:.3f}); "
-        "the audit is descriptive and was not used to retune or select the development-locked operating point. "
-        "AP50 uses detections above the 0.001 confidence floor; the reported operating metrics use confidence 0.25.")
+        f"The user-designated hand-drawn sample covers 240 frames. Mean IoU with landmark-derived proxies was "
+        f"{agreement['mean']:.3f}; median IoU was {agreement['50%']:.3f} (IQR {agreement['25%']:.3f}–{agreement['75%']:.3f}), "
+        f"with {int(round(manual_stats['manual_vs_proxy_iou_ge_0_5'] * 240))}/240 pairs at IoU 0.50 or higher. "
+        "The boxes exactly match the accompanying InsightFace proposal coordinates, so the comparison is descriptive "
+        "and does not independently validate those proposals. It was not used to retune or select the development-locked "
+        "operating point. AP50 uses detections above the 0.001 confidence floor; the reported operating metrics use 0.25.")
 
     add_heading(template, "D. Model-Assisted Pseudo-Label Sensitivity", level=2)
     pseudo_rows = []
@@ -413,15 +416,16 @@ def main() -> None:
         "Resolution changes both detection quality and the detector workload under the stated transforms and "
         "hardware. The development-locked result provides one reproducible operating point when the preset "
         "AP50 and recall constraints can be met. The full test sweep is descriptive and should be interpreted "
-        "against both the proxy-label definition and the separate 240-frame hand-drawn audit, the model-specific "
+        "against both the proxy-label definition and the 240-frame user-designated box audit, the model-specific "
         "training recipes, and the measured GPU only. "
         "An AP50 value near one would indicate close agreement with the derived boxes, not perfect face "
         "detection or recognition.")
     add_heading(template, "B. Limitations and Future Work", level=2)
     add_body(template,
-        "The full resolution sweep is evaluated against eye-landmark-derived proxies; the separate hand-drawn "
-        "audit covers 240 test frames from one annotator, has no inter-annotator agreement or adjudication, "
-        "and its coordinates exactly match the proxies. The pseudo-label sensitivity check is model-generated "
+        "The full resolution sweep is evaluated against eye-landmark-derived proxies; the separate user-designated "
+        "hand-drawn audit covers 240 test frames from one annotator, has no inter-annotator agreement or adjudication, "
+        "and its coordinates exactly match the accompanying InsightFace proposal file. The manual-reference comparison "
+        "is therefore not independent of those proposals. The pseudo-label sensitivity check is model-generated "
         "and not human ground truth. "
         "The experiment covers only "
         "Portal 1 indoor frontal sequences and one RTX 3050 "

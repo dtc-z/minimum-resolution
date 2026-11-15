@@ -1,4 +1,6 @@
-# YuNet model-assisted box audit
+# Historical YuNet model-assisted box audit
+
+This proposal audit used the earlier `../annotations/manual_boxes_240.csv` reference set. It is superseded for the paper by the latest user-confirmed hand-drawn `../annotations/boxes_only_240.csv` and must not be cited as the paper's manual-box result.
 
 This is a second automatic face-box proposal pass on the same fixed 240-frame sample used for SCRFD. YuNet is from the [OpenCV Zoo face-detection model](https://github.com/opencv/opencv_zoo/tree/main/models/face_detection_yunet); its published model files are MIT-licensed. The run used OpenCV 4.11.0 on CPU, input 640×640, score threshold 0.30, and NMS threshold 0.30. Input images were aspect-preserving resized and centered on a black square; detections were mapped back to the original frame coordinates.
 
@@ -6,9 +8,9 @@ The subject's `person_role_label` is set to `attacker` on the user's assumption 
 
 ## Results
 
-YuNet detected a face in 240/240 frames. Median IoU against the user-drawn reference boxes was 0.628, median center distance 11.28 px, and median model-box/reference area ratio 0.641. On the same frames, SCRFD achieved median IoU 0.624 and median center distance 13.33 px. The median IoU between the two models' selected boxes was 0.911. Detector confidence values are model-specific and should not be compared across models.
+YuNet detected a face in 240/240 frames. Against the earlier reference boxes, median IoU was 0.628, median center distance 11.28 px, and median model-box/reference area ratio 0.641. On the same frames, SCRFD achieved median IoU 0.624 and median center distance 13.33 px. The median IoU between the two models' selected boxes was 0.911. Detector confidence values are model-specific and should not be compared across models. These values are historical and do not describe the latest manual-box file.
 
-The 240 reference boxes equal the existing landmark-proxy boxes exactly, so agreement with these references does not independently measure any bias in the original proxy labels. The no-occlusion condition is the user's assumption and was not independently assessed. YuNet/SCRFD boxes are used only in the paper's explicitly labeled exploratory pseudo-label sensitivity check; the detectors do not verify the `attacker` role.
+The earlier 240 reference boxes equaled the existing landmark-proxy boxes exactly. This statement applies only to the superseded reference file. The no-occlusion condition is the user's assumption and was not independently assessed. YuNet/SCRFD boxes are used only in the paper's explicitly labeled exploratory pseudo-label sensitivity check; the detectors do not verify the `attacker` role.
 
 ## Files
 
