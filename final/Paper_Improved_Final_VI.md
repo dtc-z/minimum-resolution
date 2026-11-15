@@ -48,6 +48,8 @@ ChokePoint cung cấp mốc mắt được gán nhãn thủ công thay vì hình
 
 Tác giả vẽ một hộp khuôn mặt cho mỗi 240 khung hình test, phân tầng theo bốn chuỗi và ba nhóm khoảng cách giữa hai mắt. Các hộp này được giữ riêng và dùng cho một phép kiểm toán thứ cấp; chúng không tham gia chọn mô hình hay điểm vận hành. Không có người gán nhãn thứ hai hoặc bước phân xử được ghi nhận.
 
+Để giảm công rà soát thủ công, một bộ hộp tham chiếu giả lập riêng được tạo từ dự đoán của SCRFD-10GF tiền huấn luyện và YuNet trên cùng 240 khung hình. Khi hai hộp được chọn có IoU ít nhất 0,50 và mỗi detector chỉ trả về một khuôn mặt, tọa độ được lấy trung bình (164 ảnh). Với 76 ảnh còn lại có bất đồng hoặc nhiều khuôn mặt, hộp YuNet lớn nhất được giữ làm nhãn tạm và gắn cờ cần xem lại. Đây là hộp do mô hình tạo, không phải ground truth do người xác nhận.
+
 ### D. Bộ phát hiện và tinh chỉnh
 
 Các mô hình được so sánh gồm YOLOv5nu, YOLOv8n và YOLOv12n khởi tạo từ trọng số nano Ultralytics cục bộ, cùng bộ phát hiện khuôn mặt SCRFD-500M khởi tạo từ checkpoint trong model zoo chính thức của InsightFace [4]. Mỗi mô hình được tinh chỉnh trên cùng 4.900 mẫu huấn luyện và chọn checkpoint bằng cùng 1.135 mẫu phát triển. YOLO được huấn luyện 20 epoch, ảnh 640 pixel, batch size 8, seed 391 và các mặc định Ultralytics 8.4.54 đã ghi nhận, với cơ chế tự chọn optimizer. SCRFD được huấn luyện 20 epoch, batch size 2, seed 391 theo công thức huấn luyện MMDetection với SGD và learning rate 0,0025. Chi tiết công thức khác nhau theo framework và được ghi trong artifact chạy; phép so sánh kiểm soát cách chia dữ liệu chứ không đồng nhất mọi tham số optimizer hay augmentation.
@@ -91,6 +93,19 @@ Hình 1 cho thấy AP50 và recall theo độ rộng ở confidence 0,25. Hình 
 | SCRFD-500M-FT | 0,861 | 0,965 | 0,808 | 0,880 |
 
 Trong cả 240 ảnh, IoU giữa hộp vẽ tay và hộp suy ra từ mốc mắt bằng 1,000 (IQR 1,000–1,000). Vì hai tập hộp trùng tọa độ trong mẫu này, phép kiểm toán không cung cấp đánh giá độc lập về độ lệch của nhãn đại diện. AP50 dùng confidence tối thiểu 0,001; precision, recall và F1 dùng confidence 0,25.
+
+### D. Kiểm tra độ nhạy với pseudo-label do mô hình tạo
+
+**Bảng IV. Mức phù hợp với hộp giả lập YuNet/SCRFD trên 240 ảnh ở độ rộng 288 pixel. AP50 dùng confidence tối thiểu 0,001; precision, recall và F1 dùng confidence 0,25.**
+
+| Mô hình | AP50 | Precision | Recall | F1 |
+|---|---:|---:|---:|---:|
+| YOLOv5nu-FT | 0,956 | 0,979 | 0,963 | 0,971 |
+| YOLOv8n-FT | 0,945 | 0,958 | 0,954 | 0,956 |
+| YOLOv12n-FT | 0,939 | 0,978 | 0,938 | 0,957 |
+| SCRFD-500M-FT | 0,239 | 0,403 | 0,338 | 0,367 |
+
+Các điểm số này đo mức phù hợp với hộp tham chiếu do mô hình tạo, không phải độ chính xác so với nhãn người gán. Bộ tham chiếu chưa được xác nhận; 76 ảnh được gắn cờ cần xem lại.
 
 ![Hình 1. AP50 và recall trên tập kiểm thử theo độ rộng đầu vào ở confidence 0,25; nhãn là hộp đại diện suy ra từ mốc mắt.](figures/vi/fig01_accuracy_by_resolution_vi.png)
 

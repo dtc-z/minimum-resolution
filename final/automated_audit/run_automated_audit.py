@@ -99,6 +99,8 @@ def main() -> None:
         row = item.to_dict()
         row.update({
             "automated_detector": MODEL_NAME,
+            "person_role_label": "attacker",
+            "person_role_source": "user_assumption",
             "detection_threshold": DETECTION_THRESHOLD,
             "image_read_status": "ok" if image is not None else "unreadable",
             "face_count": 0,
@@ -174,6 +176,8 @@ def main() -> None:
         "human_annotation": True,
         "annotation_source": "user_drawn_manual_annotation",
         "reference_box_source": "user_drawn_manual_annotation",
+        "person_role_assumption": "attacker",
+        "person_role_source": "user_assumption; not classified by the detector",
         "paper_modified": False,
         "occlusion": "assumed_none based on user-provided statement; not independently assessed",
         "sample_count": len(sample),

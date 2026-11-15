@@ -38,5 +38,7 @@
   "annotation_source": "user-confirmed hand-drawn boxes in sample.csv; prior automatic_SCRFD_10GF_proposal source label was incorrect",
   "reference_box_source": "user_drawn_manual_annotation",
   "median_iou_with_manual_boxes": 0.624292470141534,
-  "median_auto_to_manual_area_ratio": 0.6461355461205637
+  "median_auto_to_manual_area_ratio": 0.6461355461205637,
+  "person_role_assumption": "attacker",
+  "person_role_source": "user_assumption; not classified by the detector"
 }

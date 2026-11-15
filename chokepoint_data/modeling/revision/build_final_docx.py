@@ -164,6 +164,7 @@ def main() -> None:
     parser.add_argument("--figures", default="chokepoint_data/modeling/final_revision/figures")
     parser.add_argument("--manual-summary", default="final/benchmark/manual_box_audit/manual_box_summary.csv")
     parser.add_argument("--manual-stats", default="final/benchmark/manual_box_audit/manual_box_summary.json")
+    parser.add_argument("--pseudo-summary", default="final/benchmark/pseudo_box_audit/pseudo_box_summary.csv")
     parser.add_argument("--out", default="docs/Paper_Improved_Final.docx")
     args = parser.parse_args()
 
@@ -174,6 +175,7 @@ def main() -> None:
     selection = json.loads(Path(args.selection).read_text(encoding="utf-8"))
     manual_summary = pd.read_csv(args.manual_summary)
     manual_stats = json.loads(Path(args.manual_stats).read_text(encoding="utf-8"))
+    pseudo_summary = pd.read_csv(args.pseudo_summary)
     figures = Path(args.figures)
     required_figures = [
         figures / "fig01_accuracy_by_resolution.png",
@@ -279,6 +281,12 @@ def main() -> None:
         "and three eye-distance strata. These reference boxes are preserved separately from the proxy labels. "
         "The manual sample is used for a secondary audit only; it does not change model or operating-point "
         "selection. No second annotator or adjudication was recorded.")
+    add_body(template,
+        "To reduce manual review effort, a separate pseudo-reference set was formed from pretrained SCRFD-10GF "
+        "and OpenCV Zoo YuNet proposals on the same 240 frames. When both selected boxes agreed at IoU 0.50 "
+        "or higher and neither model returned multiple faces, their coordinates were averaged (164 frames). "
+        "For the remaining 76 flagged frames, the largest YuNet proposal was retained and marked for review. "
+        "These model-generated boxes are exploratory references, not human ground truth.")
 
     add_heading(template, "D. Detectors and Fine-Tuning", level=2)
     add_body(template,
@@ -385,6 +393,20 @@ def main() -> None:
         "the audit is descriptive and was not used to retune or select the development-locked operating point. "
         "AP50 uses detections above the 0.001 confidence floor; the reported operating metrics use confidence 0.25.")
 
+    add_heading(template, "D. Model-Assisted Pseudo-Label Sensitivity", level=2)
+    pseudo_rows = []
+    for model in summary["model"].drop_duplicates().tolist():
+        row = get_manual_row(pseudo_summary, model, 288, 0.25)
+        pseudo_rows.append([model, f"{row['ap50']:.3f}", f"{row['precision']:.3f}",
+                            f"{row['recall']:.3f}", f"{row['f1']:.3f}"])
+    add_caption(template, "TABLE IV. Agreement with YuNet/SCRFD pseudo-boxes on 240 frames at 288-pixel width. AP50 uses confidence floor 0.001; precision, recall, and F1 use 0.25.", table=True)
+    add_table(template, ["Model", "AP50", "Precision", "Recall", "F1"], pseudo_rows,
+              [1.35, 0.48, 0.68, 0.5, 0.42])
+    add_body(template,
+        "These scores measure agreement with model-generated reference boxes and must not be read as human-label "
+        "accuracy. The test models did not produce the reference boxes, but the references remain unverified; "
+        "76 frames specifically require visual review.")
+
     add_heading(template, "IV. DISCUSSION AND CONCLUSION")
     add_heading(template, "A. Interpretation", level=2)
     add_body(template,
@@ -398,7 +420,9 @@ def main() -> None:
     add_heading(template, "B. Limitations and Future Work", level=2)
     add_body(template,
         "The full resolution sweep is evaluated against eye-landmark-derived proxies; the separate hand-drawn "
-        "audit covers 240 test frames from one annotator and has no inter-annotator agreement or adjudication. "
+        "audit covers 240 test frames from one annotator, has no inter-annotator agreement or adjudication, "
+        "and its coordinates exactly match the proxies. The pseudo-label sensitivity check is model-generated "
+        "and not human ground truth. "
         "The experiment covers only "
         "Portal 1 indoor frontal sequences and one RTX 3050 "
         "Laptop GPU; it does not establish cross-portal, outdoor, occlusion, identity-disjoint, or "

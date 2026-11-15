@@ -1,0 +1,11 @@
+{
+  "same_frame_count": 240,
+  "same_manual_reference_boxes": true,
+  "person_role_assumption": "attacker",
+  "person_role_source": "user_assumption; not classified by the detectors",
+  "frames_detected_by_both": 240,
+  "frames_flagged_for_visual_review": 76,
+  "median_iou_between_yunet_and_scrfd_boxes": 0.9112117855510693,
+  "median_iou_gain_yunet_minus_scrfd_vs_manual": 0.008055391045243998,
+  "median_center_distance_change_yunet_minus_scrfd_px": -1.8735708832555806
+}

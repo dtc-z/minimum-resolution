@@ -21,6 +21,8 @@ sample = sample[[
     "x1", "y1", "x2", "y2",
 ]].copy()
 sample["occlusion_assumption"] = "none_assumed_from_user_statement"
+sample["person_role_label"] = "attacker"
+sample["person_role_source"] = "user_assumption"
 sample["box_source"] = "landmark_proxy_reference"
 sample["selection_seed"] = 391
 sample.to_csv(OUT, index=False)

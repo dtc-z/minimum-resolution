@@ -19,6 +19,7 @@ __pycache__/
 *.pth
 *.onnx
 *.engine
+!/final/automated_audit_yunet/model/face_detection_yunet_2023mar.onnx
 
 # Large raw benchmark predictions
 /chokepoint_data/modeling/final_revision/benchmark/predictions.csv.gz
@@ -39,6 +40,10 @@ __pycache__/
 /runs/
 /final/automated_audit/model_output/overlays/
 /final/automated_audit/model_output/contact_sheets/
+/final/automated_audit_yunet/model_output/overlays/
+/final/automated_audit_yunet/model_output/contact_sheets/
+/final/automated_audit_yunet/model_output/review_contact_sheets/
+/final/automated_audit_yunet/model_output/model_proposals.csv
 
 # Local audit CSVs contain absolute image paths; keep the aggregate summary instead
 /final/automated_audit/sample.csv
