@@ -1,4 +1,4 @@
-dataset,size_stratum,samples,median_iou,median_center_distance_px,median_auto_to_proxy_area_ratio,median_confidence
+dataset,size_stratum,samples,median_iou,median_center_distance_px,median_auto_to_manual_area_ratio,median_confidence
 P1E_S3_C3,large,20,0.6308297307705326,21.44859995058986,0.6581317847510215,0.8566063642501831
 P1E_S3_C3,medium,20,0.6445475655045392,18.16063173025382,0.6846068849373568,0.8206942975521088
 P1E_S3_C3,small,20,0.6108944859019176,15.391234634125496,0.6483740763774631,0.8831680417060852

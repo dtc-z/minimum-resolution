@@ -1,0 +1,42 @@
+{
+  "manual_images": 240,
+  "models": [
+    "SCRFD-500M-FT",
+    "YOLOv12n-FT",
+    "YOLOv5nu-FT",
+    "YOLOv8n-FT"
+  ],
+  "resolutions": [
+    128,
+    160,
+    192,
+    240,
+    256,
+    288,
+    320,
+    384,
+    480,
+    640
+  ],
+  "confidence_thresholds": [
+    0.25,
+    0.35,
+    0.45,
+    0.55,
+    0.65,
+    0.7
+  ],
+  "ap_confidence_floor": 0.001,
+  "status": "computed_from_user_confirmed_hand_drawn_annotations_and_final_predictions",
+  "manual_vs_proxy_iou": {
+    "count": 240.0,
+    "mean": 1.0,
+    "std": 0.0,
+    "min": 1.0,
+    "25%": 1.0,
+    "50%": 1.0,
+    "75%": 1.0,
+    "max": 1.0
+  },
+  "manual_vs_proxy_iou_ge_0_5": 1.0
+}

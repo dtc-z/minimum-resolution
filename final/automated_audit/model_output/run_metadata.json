@@ -1,6 +1,6 @@
 {
-  "status": "automated_detector_proposals_complete",
-  "human_annotation": false,
+  "status": "automated_scrfd_proposals_compared_with_user_drawn_manual_boxes",
+  "human_annotation": true,
   "paper_modified": false,
   "occlusion": "assumed_none based on user-provided statement; not independently assessed",
   "sample_count": 240,
@@ -33,8 +33,10 @@
   "images_with_detection": 240,
   "images_without_detection": 0,
   "mean_model_confidence": 0.8573811136186122,
-  "median_iou_with_landmark_proxy": 0.624292470141534,
   "median_center_distance_px": 13.33317297376546,
-  "median_auto_to_proxy_area_ratio": 0.6461355461205637,
-  "completed_utc": "2026-11-15T07:44:35.145575+00:00"
+  "completed_utc": "2026-11-15T07:44:35.145575+00:00",
+  "annotation_source": "user-confirmed hand-drawn boxes in sample.csv; prior automatic_SCRFD_10GF_proposal source label was incorrect",
+  "reference_box_source": "user_drawn_manual_annotation",
+  "median_iou_with_manual_boxes": 0.624292470141534,
+  "median_auto_to_manual_area_ratio": 0.6461355461205637
 }

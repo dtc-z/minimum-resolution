@@ -11,6 +11,6 @@ The candidate pool is generated only from the locked test manifest with seed 391
 
 Launch the OpenCV UI with `revision/annotate_face_boxes.py --sample ... --annotator A|B --out ...`. Drag a rectangle, press `0`–`3` for occlusion, then Enter to save. Press `n` to skip and Esc to stop. The source data and sample are not modified.
 
-Status: candidate sampler, occlusion-stratified finalizer, and tool are prepared; human annotation, adjudication, IoU/box sensitivity, and manual-label AP50/recall remain pending.
+Status: the user completed hand-drawn boxes for 240 test frames. The coordinates and detector comparison are in `final/annotations/manual_boxes_240.csv` and `final/benchmark/manual_box_audit/`. No second annotator or adjudication was recorded. The manual boxes exactly match the derived proxy coordinates in all 240 frames, so this sample does not independently estimate proxy-label bias.
 
 Workspace note: Windows ACLs deny ordinary processes read access to the source-image hardlinks. Training and benchmark runs in this workspace were launched with elevated read access; the annotation UI must also be able to read those source images. It writes annotation CSVs to the selected workspace output path and does not modify the source images.

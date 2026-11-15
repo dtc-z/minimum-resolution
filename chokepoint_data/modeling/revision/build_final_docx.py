@@ -112,15 +112,30 @@ def get_row(summary: pd.DataFrame, model: str, width: int, confidence: float):
     return selected.iloc[0]
 
 
-def make_abstract(summary: pd.DataFrame, selection: dict) -> str:
+def get_manual_row(summary: pd.DataFrame, model: str, width: int, confidence: float):
+    selected = summary[
+        (summary["model"] == model)
+        & (summary["resolution_width"] == width)
+        & (summary["conf_threshold"] == confidence)
+    ]
+    if selected.empty:
+        raise ValueError(f"No manual-box result for {model}, {width}px, confidence={confidence}")
+    return selected.iloc[0]
+
+
+def make_abstract(summary: pd.DataFrame, selection: dict, manual_summary: pd.DataFrame,
+                  manual_stats: dict) -> str:
     if selection.get("selected_model"):
         model = selection["selected_model"]
         width = int(selection["selected_width"])
         row = get_row(summary, model, width, float(selection["confidence"]))
+        audit_row = get_manual_row(manual_summary, model, width, float(selection["confidence"]))
         selected_result = (
             f"The development-only rule selected {model} at {width} pixels. On the locked test set, "
             f"this setting obtained average precision at IoU 0.50 (AP50) {row['ap50_vs_derived_boxes']:.3f}, recall {row['recall']:.3f}, "
-            f"and median throughput {row['fps_median']:.1f} frames per second."
+            f"and median throughput {row['fps_median']:.1f} frames per second. Against hand-drawn boxes on a "
+            f"stratified 240-frame test audit, the same setting obtained AP50 {audit_row['ap50']:.3f} and "
+            f"recall {audit_row['recall']:.3f}."
         )
     else:
         selected_result = (
@@ -134,10 +149,9 @@ def make_abstract(summary: pd.DataFrame, selection: dict) -> str:
         "YOLOv5nu, YOLOv8n, YOLOv12n, and SCRFD-500M. Evaluation sweeps ten input widths from 640 to "
         "128 pixels and six confidence thresholds; operating-point selection uses development data only. "
         + selected_result
-        + " The researcher reports completing hand-drawn boxes for 240 test images, but their coordinate file "
-        "was not available to this analysis. Reported metrics therefore remain based on face boxes derived "
-        "from eye landmarks; no manual-box accuracy result is claimed. The results describe agreement "
-        "with this proxy-label protocol on one portal and GPU; they do not measure identity recognition "
+        + f" The median IoU between hand-drawn and landmark-derived boxes was "
+        f"{manual_stats['manual_vs_proxy_iou']['50%']:.3f}. The benchmark and audit describe detector "
+        "performance on one portal and GPU; they do not measure identity recognition "
         "or end-to-end pipeline performance."
     )
 
@@ -148,6 +162,8 @@ def main() -> None:
     parser.add_argument("--summary", default="chokepoint_data/modeling/final_revision/benchmark/summary.csv")
     parser.add_argument("--selection", default="chokepoint_data/modeling/final_revision/benchmark/operating_point_dev_locked.json")
     parser.add_argument("--figures", default="chokepoint_data/modeling/final_revision/figures")
+    parser.add_argument("--manual-summary", default="final/benchmark/manual_box_audit/manual_box_summary.csv")
+    parser.add_argument("--manual-stats", default="final/benchmark/manual_box_audit/manual_box_summary.json")
     parser.add_argument("--out", default="docs/Paper_Improved_Final.docx")
     args = parser.parse_args()
 
@@ -156,6 +172,8 @@ def main() -> None:
     if not summary["split"].eq("test").all() or summary.empty:
         raise ValueError("Canonical summary must contain only final test rows")
     selection = json.loads(Path(args.selection).read_text(encoding="utf-8"))
+    manual_summary = pd.read_csv(args.manual_summary)
+    manual_stats = json.loads(Path(args.manual_stats).read_text(encoding="utf-8"))
     figures = Path(args.figures)
     required_figures = [
         figures / "fig01_accuracy_by_resolution.png",
@@ -198,7 +216,7 @@ def main() -> None:
 
     abstract = template.add_paragraph(style="Abstract")
     abstract.add_run("Abstract— ").bold = True
-    abstract.add_run(make_abstract(summary, selection))
+    abstract.add_run(make_abstract(summary, selection, manual_summary, manual_stats))
     keywords = template.add_paragraph(style="Keywords")
     keywords.add_run("Index Terms— ").bold = True
     keywords.add_run("face detection, surveillance video, ChokePoint, resolution scaling, throughput, YOLO, SCRFD.")
@@ -257,11 +275,10 @@ def main() -> None:
         "boundaries. Reported AP50, precision, recall, and F1 therefore measure agreement with this proxy "
         "label construction, not localization against manually annotated face rectangles.")
     add_body(template,
-        "The researcher reports completing hand-drawn face boxes for a 240-image test sample. The coordinates "
-        "were not available to the analysis pipeline used for this revision, so no manual-box accuracy result "
-        "is claimed and the reported detector metrics still use the eye-landmark-derived boxes. The sample "
-        "was stratified by sequence and face size; occlusion labels and adjudication are not documented "
-        "in the files available for this revision.")
+        "The user hand-drew one face box for each of 240 test frames, sampled evenly across four test sequences "
+        "and three eye-distance strata. These reference boxes are preserved separately from the proxy labels. "
+        "The manual sample is used for a secondary audit only; it does not change model or operating-point "
+        "selection. No second annotator or adjudication was recorded.")
 
     add_heading(template, "D. Detectors and Fine-Tuning", level=2)
     add_body(template,
@@ -310,7 +327,8 @@ def main() -> None:
     add_table(template, ["Model", "AP50", "Recall", "FPS"], full_rows, [1.3, 0.55, 0.6, 0.55])
     add_body(template,
         "Table II is a descriptive reference point on the locked test set. It does not determine which "
-        "model or threshold is recommended. All accuracy values use the eye-landmark-derived proxy boxes.")
+        "model or threshold is recommended. AP50 uses detections above the 0.001 confidence floor; precision, "
+        "recall, and F1 use confidence 0.25. All values use the eye-landmark-derived proxy boxes.")
 
     add_heading(template, "B. Resolution and Confidence Trade-Off", level=2)
     if selection.get("selected_model"):
@@ -351,24 +369,41 @@ def main() -> None:
         paragraph.add_run().add_picture(str(required_figures[2]), width=Inches(3.15))
         add_caption(template, "Fig. 3. Test F1 threshold sensitivity at 640-pixel width; no development candidate met the operating-point constraints.")
 
+    add_heading(template, "C. Hand-Drawn Box Audit", level=2)
+    audit_rows = []
+    for model in summary["model"].drop_duplicates().tolist():
+        row = get_manual_row(manual_summary, model, 288, 0.25)
+        audit_rows.append([model, f"{row['ap50']:.3f}", f"{row['precision']:.3f}",
+                           f"{row['recall']:.3f}", f"{row['f1']:.3f}"])
+    add_caption(template, "TABLE III. Detector results against 240 hand-drawn test boxes at 288-pixel width. AP50 uses confidence floor 0.001; precision, recall, and F1 use 0.25.", table=True)
+    add_table(template, ["Model", "AP50", "Precision", "Recall", "F1"], audit_rows,
+              [1.35, 0.48, 0.68, 0.5, 0.42])
+    agreement = manual_stats["manual_vs_proxy_iou"]
+    add_body(template,
+        f"The hand-drawn sample covers 240 frames. Median IoU between manual boxes and the "
+        f"landmark-derived proxies was {agreement['50%']:.3f} (IQR {agreement['25%']:.3f}–{agreement['75%']:.3f}); "
+        "the audit is descriptive and was not used to retune or select the development-locked operating point. "
+        "AP50 uses detections above the 0.001 confidence floor; the reported operating metrics use confidence 0.25.")
+
     add_heading(template, "IV. DISCUSSION AND CONCLUSION")
     add_heading(template, "A. Interpretation", level=2)
     add_body(template,
         "Resolution changes both detection quality and the detector workload under the stated transforms and "
         "hardware. The development-locked result provides one reproducible operating point when the preset "
         "AP50 and recall constraints can be met. The full test sweep is descriptive and should be interpreted "
-        "against the proxy-label definition, the model-specific training recipes, and the measured GPU only. "
+        "against both the proxy-label definition and the separate 240-frame hand-drawn audit, the model-specific "
+        "training recipes, and the measured GPU only. "
         "An AP50 value near one would indicate close agreement with the derived boxes, not perfect face "
         "detection or recognition.")
     add_heading(template, "B. Limitations and Future Work", level=2)
     add_body(template,
-        "The evaluated labels are derived from eye landmarks, while the researcher reports completing separate "
-        "hand-drawn boxes for 240 test images. Their coordinates were not integrated into this analysis, so "
-        "the paper cannot yet quantify derived-box bias or report human-box AP50. The experiment covers only "
+        "The full resolution sweep is evaluated against eye-landmark-derived proxies; the separate hand-drawn "
+        "audit covers 240 test frames from one annotator and has no inter-annotator agreement or adjudication. "
+        "The experiment covers only "
         "Portal 1 indoor frontal sequences and one RTX 3050 "
         "Laptop GPU; it does not establish cross-portal, outdoor, occlusion, identity-disjoint, or "
         "cross-hardware behavior. No downstream recognition accuracy, face-count stress test, or total "
-        "pipeline latency was measured. Future work should incorporate and analyze the completed manual boxes, evaluate "
+        "pipeline latency was measured. Future work should add independent annotation and adjudication, evaluate "
         "additional portals and hardware, and measure the full detection-to-recognition pipeline.")
     add_heading(template, "C. Conclusion", level=2)
     add_body(template,
@@ -376,7 +411,7 @@ def main() -> None:
         "ChokePoint Portal 1 indoor frontal video and compares fine-tuned YOLO and SCRFD models using "
         "the same train, development, and test instances. A development-only rule locks the candidate "
         "before test evaluation, while a separate fixed sample measures detector throughput. Conclusions "
-        "remain limited to the derived-box labels, listed sequences, and tested GPU; recognition "
+        "remain limited to the derived-box full sweep, the 240-frame manual audit, listed sequences, and tested GPU; recognition "
         "performance and deployment safety require separate evaluation.")
 
     template.add_paragraph("REFERENCES", style="Heading 5")

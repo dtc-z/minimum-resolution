@@ -42,6 +42,7 @@ __pycache__/
 
 # Local audit CSVs contain absolute image paths; keep the aggregate summary instead
 /final/automated_audit/sample.csv
+/final/automated_audit/candidate_sample.csv
 /final/automated_audit/model_output/model_proposals.csv
 /chokepoint_data/modeling/final_revision/manual_box_audit/screening_pool.csv
 /chokepoint_data/modeling/final_revision/manual_box_audit/pilot_sequence_size_sample.csv

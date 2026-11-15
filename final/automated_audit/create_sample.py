@@ -1,4 +1,4 @@
-"""Create the deterministic 240-frame model-proposal sample."""
+"""Create a deterministic candidate list from the landmark-proxy test manifest."""
 
 from pathlib import Path
 
@@ -7,7 +7,7 @@ import pandas as pd
 
 WORKSPACE = Path(__file__).resolve().parents[2]
 POOL = WORKSPACE / "chokepoint_data/modeling/final_revision/manual_box_audit/screening_pool.csv"
-OUT = Path(__file__).resolve().parent / "sample.csv"
+OUT = Path(__file__).resolve().parent / "candidate_sample.csv"
 
 pool = pd.read_csv(POOL)
 sample = (
@@ -21,7 +21,7 @@ sample = sample[[
     "x1", "y1", "x2", "y2",
 ]].copy()
 sample["occlusion_assumption"] = "none_assumed_from_user_statement"
-sample["box_source"] = "automatic_SCRFD_10GF_proposal"
+sample["box_source"] = "landmark_proxy_reference"
 sample["selection_seed"] = 391
 sample.to_csv(OUT, index=False)
 print(f"Wrote {len(sample)} model-proposal samples to {OUT}")

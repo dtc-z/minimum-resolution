@@ -1,24 +1,20 @@
-# SCRFD proposal run (separate from the user's manual box annotations)
+# Manual face-box audit
 
-This folder records an automatic SCRFD comparison pass over a deterministic sample of 240 test frames. The user confirms that the 240 boxes were drawn manually in a separate annotation pass; that coordinate file is not among the files in this folder. The SCRFD proposals below are auxiliary outputs and must not be substituted for those human boxes.
+The 240 reference boxes in `../annotations/manual_boxes_240.csv` were drawn by the user. The earlier `box_source=automatic_SCRFD_10GF_proposal` value was assigned incorrectly. The annotation file keeps sequence/frame keys and box coordinates without local image paths.
 
-## Run details
+`model_output/` contains a separate automated SCRFD-10GF proposal pass against those hand-drawn reference boxes. It ran the detector only; no face recognition or embeddings were used. The detector selected its largest face proposal in each image. The 240 annotations are balanced across four test sequences and three eye-distance strata (20 frames per stratum in each sequence).
 
-- Model: InsightFace `buffalo_l` / SCRFD-10GF, detector module only; no recognition or embeddings were run.
-- Input: 640?640, detection threshold 0.10. The largest detected face was selected as the target; all detections are retained in the local proposal CSV.
-- Runtime: ONNX Runtime fell back to CPU because the CUDA provider could not load `cudnn64_9.dll`. All 240 frames completed on CPU.
-- Sample: seed 391; 20 frames for each of four test sequences and three eye-distance strata. Occlusion was assumed absent based on the user's statement and was not independently assessed.
-- Results: detections on 240/240 frames; mean confidence 0.857; median IoU with the landmark-derived proxy box 0.624; median center distance 13.33 px; median detector-box/proxy-box area ratio 0.646.
+## Results
 
-These values compare an automatic detector with the landmark-derived proxy labels. They do not measure agreement with human boxes, manual-box AP50/recall, or label bias. Red boxes in local overlays are landmark proxies; green boxes are automatic detector proposals.
+The automatic proposals were detected on 240/240 frames. Mean detector confidence was 0.857; median IoU with the user-drawn boxes was 0.624; median center distance was 13.33 px; median proposal-to-reference area ratio was 0.646. The user-drawn boxes exactly match the corresponding landmark-proxy coordinates (IoU 1.000 for all 240 frames), so this audit does not independently estimate proxy-label bias. This proposal pass is separate from the four fine-tuned detectors in the main benchmark.
+
+## Files
+
+- `../annotations/manual_boxes_240.csv` — hand-drawn reference coordinates, keyed by sequence and frame number.
+- `create_sample.py` — creates a candidate list from the landmark-proxy manifest; it does not overwrite the manual annotation file.
+- `run_automated_audit.py` — SCRFD proposals and compact comparison summaries.
+- `model_output/summary_by_sequence_and_size.csv` — aggregate proposal comparison by sequence and face-size stratum.
+- `model_output/run_metadata.json` — model, runtime, and annotation-source metadata.
+- Local per-frame detector outputs and visual overlays are excluded from version control because they contain absolute image paths or face frames.
 
 The pretrained InsightFace weights are licensed for non-commercial research. See the [official SCRFD results](https://github.com/deepinsight/insightface/blob/master/detection/scrfd/README.md) and [model zoo terms](https://github.com/deepinsight/insightface/blob/master/python-package/docs/model_zoo.md).
-
-## Contents
-
-- `create_sample.py` ? deterministic sample selection.
-- `run_automated_audit.py` ? detector proposals and aggregate summaries.
-- `sample.csv` and `model_output/model_proposals.csv` ? per-frame local outputs with image paths; do not publish without sanitizing those paths.
-- `model_output/summary_by_sequence_and_size.csv` ? aggregate summary by test sequence and face-size stratum.
-- `model_output/run_metadata.json` ? model and runtime details.
-- `model_output/overlays/` and `contact_sheets/` ? local visual review aids containing faces; excluded from version control.

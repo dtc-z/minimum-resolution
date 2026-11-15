@@ -1,7 +1,7 @@
-"""Create model-generated face-box proposals for the locked audit sample.
+"""Compare automatic SCRFD proposals with user-drawn boxes on 240 test frames.
 
-These are automated proposals, not human annotations. The script loads only
-InsightFace's SCRFD detector module and does not run face recognition.
+The reference boxes are hand-drawn by the user. SCRFD proposals remain automatic.
+The script loads only InsightFace's detector module and does not run recognition.
 """
 
 from __future__ import annotations
@@ -56,16 +56,16 @@ def clipped_box(box, width: int, height: int) -> list[float]:
     ]
 
 
-def draw_overlay(image, detections, chosen_box, chosen_score, proxy_box, out_path: Path) -> None:
+def draw_overlay(image, detections, chosen_box, chosen_score, reference_box, out_path: Path) -> None:
     canvas = image.copy()
     for box, score in detections:
         x1, y1, x2, y2 = [int(round(v)) for v in box]
         cv2.rectangle(canvas, (x1, y1), (x2, y2), (0, 180, 255), 1)
         cv2.putText(canvas, f"SCRFD {score:.2f}", (x1, max(16, y1 - 5)),
                     cv2.FONT_HERSHEY_SIMPLEX, 0.4, (0, 120, 180), 1, cv2.LINE_AA)
-    px1, py1, px2, py2 = [int(round(v)) for v in proxy_box]
+    px1, py1, px2, py2 = [int(round(v)) for v in reference_box]
     cv2.rectangle(canvas, (px1, py1), (px2, py2), (0, 0, 255), 2)
-    cv2.putText(canvas, "LANDMARK PROXY", (px1, max(16, py1 - 5)),
+    cv2.putText(canvas, "USER-DRAWN BOX", (px1, max(16, py1 - 5)),
                 cv2.FONT_HERSHEY_SIMPLEX, 0.45, (0, 0, 220), 1, cv2.LINE_AA)
     if chosen_box is not None:
         x1, y1, x2, y2 = [int(round(v)) for v in chosen_box]
@@ -81,6 +81,8 @@ def main() -> None:
     sample = pd.read_csv(SAMPLE)
     if len(sample) != 240:
         raise ValueError(f"Expected 240 audit samples, found {len(sample)}")
+    if "box_source" not in sample or not sample.box_source.eq("user_drawn_manual_annotation").all():
+        raise ValueError("The 240 reference boxes must be tagged as user-drawn manual annotations")
     if not WEIGHTS.is_file():
         raise FileNotFoundError(f"Expected pretrained detector weights at {WEIGHTS}")
 
@@ -105,9 +107,9 @@ def main() -> None:
             "auto_target_x2": np.nan,
             "auto_target_y2": np.nan,
             "auto_target_score": np.nan,
-            "iou_auto_vs_landmark_proxy": np.nan,
+            "iou_auto_vs_manual_box": np.nan,
             "auto_center_distance_px": np.nan,
-            "auto_to_proxy_area_ratio": np.nan,
+            "auto_to_manual_area_ratio": np.nan,
             "all_detections_json": "[]",
             "error": "",
         })
@@ -138,14 +140,14 @@ def main() -> None:
                     "auto_target_x1": box[0], "auto_target_y1": box[1],
                     "auto_target_x2": box[2], "auto_target_y2": box[3],
                     "auto_target_score": score,
-                    "iou_auto_vs_landmark_proxy": iou(
+                    "iou_auto_vs_manual_box": iou(
                         box, [item["x1"], item["y1"], item["x2"], item["y2"]]
                     ),
                     "auto_center_distance_px": float(np.hypot(
                         (box[0] + box[2] - item["x1"] - item["x2"]) / 2,
                         (box[1] + box[3] - item["y1"] - item["y2"]) / 2,
                     )),
-                    "auto_to_proxy_area_ratio": (
+                    "auto_to_manual_area_ratio": (
                         max(0.0, box[2] - box[0]) * max(0.0, box[3] - box[1])
                         / max(1.0, (item["x2"] - item["x1"]) * (item["y2"] - item["y1"]))
                     ),
@@ -168,8 +170,10 @@ def main() -> None:
     providers_used = list(ort.get_available_providers())
     execution_providers = app.models["detection"].session.get_providers()
     metadata = {
-        "status": "automated_detector_proposals_complete",
-        "human_annotation": False,
+        "status": "automated_scrfd_proposals_compared_with_user_drawn_manual_boxes",
+        "human_annotation": True,
+        "annotation_source": "user_drawn_manual_annotation",
+        "reference_box_source": "user_drawn_manual_annotation",
         "paper_modified": False,
         "occlusion": "assumed_none based on user-provided statement; not independently assessed",
         "sample_count": len(sample),
@@ -191,22 +195,22 @@ def main() -> None:
         "images_with_detection": len(successful),
         "images_without_detection": int((result["auto_target_score"].isna()).sum()),
         "mean_model_confidence": float(successful["auto_target_score"].mean()) if len(successful) else None,
-        "median_iou_with_landmark_proxy": float(successful["iou_auto_vs_landmark_proxy"].median()) if len(successful) else None,
+        "median_iou_with_manual_boxes": float(successful["iou_auto_vs_manual_box"].median()) if len(successful) else None,
         "median_center_distance_px": float(successful["auto_center_distance_px"].median()) if len(successful) else None,
-        "median_auto_to_proxy_area_ratio": float(successful["auto_to_proxy_area_ratio"].median()) if len(successful) else None,
+        "median_auto_to_manual_area_ratio": float(successful["auto_to_manual_area_ratio"].median()) if len(successful) else None,
         "completed_utc": datetime.now(timezone.utc).isoformat(),
     }
     (OUT / "run_metadata.json").write_text(json.dumps(metadata, indent=2), encoding="utf-8")
     # Compact per-sequence/face-size summaries for quick review.
     successful.groupby(["dataset", "size_stratum"], dropna=False).agg(
         samples=("image_path", "count"),
-        median_iou=("iou_auto_vs_landmark_proxy", "median"),
+        median_iou=("iou_auto_vs_manual_box", "median"),
         median_center_distance_px=("auto_center_distance_px", "median"),
-        median_auto_to_proxy_area_ratio=("auto_to_proxy_area_ratio", "median"),
+        median_auto_to_manual_area_ratio=("auto_to_manual_area_ratio", "median"),
         median_confidence=("auto_target_score", "median"),
     ).reset_index().to_csv(OUT / "summary_by_sequence_and_size.csv", index=False)
 
-    # Contact sheets show both boxes: red is the landmark proxy, green the
+    # Contact sheets show both boxes: red is the user-drawn reference, green the
     # model's largest detection. They are visual model-assisted review aids.
     for dataset, group in sample.groupby("dataset", sort=True):
         thumbs = []

@@ -17,110 +17,103 @@ def box_iou(a, b):
     return inter / (area_a + area_b - inter) if area_a + area_b > inter else 0.0
 
 
+def frame_key(dataset, frame_number):
+    return f"{dataset}:{int(frame_number)}"
+
+
+def prediction_key(path):
+    parts = str(path).replace("\\", "/").split("/")
+    return f"{parts[-2]}:{int(Path(parts[-1]).stem)}"
+
+
 def ap50(gt, predictions):
     ordered = predictions.sort_values("conf", ascending=False)
     matched = set()
     tp, fp = [], []
     for row in ordered.itertuples(index=False):
-        path = row.image_path
+        key = row.frame_key
         box = [row.x1, row.y1, row.x2, row.y2]
-        if path in gt and path not in matched and box_iou(box, gt[path]) >= 0.5:
-            matched.add(path)
+        if key in gt and key not in matched and box_iou(box, gt[key]) >= 0.5:
+            matched.add(key)
             tp.append(1)
             fp.append(0)
         else:
             tp.append(0)
             fp.append(1)
-    if not gt:
-        return 0.0
-    if not tp:
+    if not gt or not tp:
         return 0.0
     ctp, cfp = np.cumsum(tp), np.cumsum(fp)
     recall = ctp / len(gt)
     precision = ctp / np.maximum(ctp + cfp, 1)
-    return float(np.mean([precision[recall >= r].max() if np.any(recall >= r) else 0.0
-                          for r in np.linspace(0, 1, 101)]))
+    return float(np.mean([
+        precision[recall >= r].max() if np.any(recall >= r) else 0.0
+        for r in np.linspace(0, 1, 101)
+    ]))
 
 
 def main() -> None:
-    parser = argparse.ArgumentParser(description="Compare detector outputs against adjudicated human face rectangles.")
-    parser.add_argument("--annotations", required=True, help="Adjudicated CSV with one human box per image_path")
+    parser = argparse.ArgumentParser(description="Evaluate final detector predictions against hand-drawn face boxes.")
+    parser.add_argument("--annotations", required=True, help="CSV with dataset, frame_number, and human_x1..human_y2")
     parser.add_argument("--predictions", required=True, help="Final benchmark predictions CSV or CSV.GZ")
     parser.add_argument("--out", required=True)
     parser.add_argument("--thresholds", default="0.25,0.35,0.45,0.55,0.65,0.70")
+    parser.add_argument("--ap-floor", type=float, default=0.001)
     args = parser.parse_args()
 
     ann = pd.read_csv(args.annotations)
-    preds = pd.read_csv(args.predictions)
-    human_fields = ["image_path", "human_x1", "human_y1", "human_x2", "human_y2"]
-    required_predictions = {"model", "resolution_width", "image_path", "x1", "y1", "x2", "y2", "conf"}
-    if set(human_fields) - set(ann.columns) or required_predictions - set(preds.columns):
-        raise ValueError("Missing human annotation or prediction columns")
-    ann = ann.dropna(subset=human_fields).drop_duplicates("image_path")
-    ann["image_path"] = ann.image_path.astype(str)
-    paths = set(ann.image_path)
-    preds = preds[preds.image_path.astype(str).isin(paths)].copy()
+    human_fields = ["dataset", "frame_number", "human_x1", "human_y1", "human_x2", "human_y2"]
+    if set(human_fields) - set(ann.columns):
+        raise ValueError(f"Annotation CSV missing fields: {sorted(set(human_fields) - set(ann.columns))}")
+    ann = ann.dropna(subset=human_fields).drop_duplicates(["dataset", "frame_number"]).copy()
+    ann["frame_key"] = [frame_key(d, n) for d, n in zip(ann.dataset, ann.frame_number)]
+    paths = set(ann.frame_key)
+    human_gt = {
+        row.frame_key: [row.human_x1, row.human_y1, row.human_x2, row.human_y2]
+        for row in ann.itertuples(index=False)
+    }
+
+    agreement_rows = []
+    proxy_fields = ["proxy_x1", "proxy_y1", "proxy_x2", "proxy_y2"]
+    if not (set(proxy_fields) - set(ann.columns)):
+        for row in ann.itertuples(index=False):
+            manual = human_gt[row.frame_key]
+            proxy = [row.proxy_x1, row.proxy_y1, row.proxy_x2, row.proxy_y2]
+            agreement_rows.append({
+                "dataset": row.dataset,
+                "frame_number": int(row.frame_number),
+                "size_stratum": getattr(row, "size_stratum", ""),
+                "manual_vs_proxy_iou": box_iou(manual, proxy),
+                "manual_center_dx": ((manual[0] + manual[2]) - (proxy[0] + proxy[2])) / 2,
+                "manual_center_dy": ((manual[1] + manual[3]) - (proxy[1] + proxy[3])) / 2,
+                "manual_width_ratio": (manual[2] - manual[0]) / max(1e-9, proxy[2] - proxy[0]),
+                "manual_height_ratio": (manual[3] - manual[1]) / max(1e-9, proxy[3] - proxy[1]),
+            })
+
+    required_predictions = ["model", "image_path", "resolution_width", "x1", "y1", "x2", "y2", "conf"]
+    chunks = []
+    rows_read = 0
+    for chunk in pd.read_csv(args.predictions, usecols=required_predictions, chunksize=500_000):
+        rows_read += len(chunk)
+        chunk["frame_key"] = chunk.image_path.map(prediction_key)
+        selected = chunk[chunk.frame_key.isin(paths) & (chunk.conf >= args.ap_floor)]
+        if not selected.empty:
+            chunks.append(selected.drop(columns="image_path"))
+        if rows_read % 2_000_000 < 500_000:
+            print(f"scanned {rows_read:,} prediction rows; retained {sum(len(item) for item in chunks):,}")
+    if not chunks:
+        raise ValueError("No predictions matched the annotated dataset/frame keys")
+    preds = pd.concat(chunks, ignore_index=True)
     thresholds = [float(item) for item in args.thresholds.split(",")]
-    human_gt = {row.image_path: [row.human_x1, row.human_y1, row.human_x2, row.human_y2]
-                for row in ann.itertuples(index=False)}
-    derived = {row.image_path: [row.x1, row.y1, row.x2, row.y2] for row in ann.itertuples(index=False)}
-
-    box_audit = []
-    for row in ann.itertuples(index=False):
-        d = derived[row.image_path]
-        h = human_gt[row.image_path]
-        box_audit.append({"image_path": row.image_path, "dataset": row.dataset,
-                          "eye_distance_px": row.eye_distance_px, "size_stratum": row.size_stratum,
-                          "human_occlusion": row.human_occlusion, "derived_human_iou": box_iou(d, h),
-                          "derived_center_dx": ((d[0] + d[2]) - (h[0] + h[2])) / 2,
-                          "derived_center_dy": ((d[1] + d[3]) - (h[1] + h[3])) / 2,
-                          "derived_width_ratio": (d[2] - d[0]) / max(1e-9, h[2] - h[0]),
-                          "derived_height_ratio": (d[3] - d[1]) / max(1e-9, h[3] - h[1])})
-    box_audit = pd.DataFrame(box_audit)
-    out = Path(args.out)
-    out.mkdir(parents=True, exist_ok=True)
-    box_audit.to_csv(out / "box_agreement.csv", index=False)
-
     records = []
-    for factor in (0.9, 1.0, 1.1):
-        scaled_gt = {}
-        for path, box in derived.items():
-            cx, cy = (box[0] + box[2]) / 2, (box[1] + box[3]) / 2
-            scaled_gt[path] = [max(0, cx - (cx - box[0]) * factor),
-                               max(0, cy - (cy - box[1]) * factor),
-                               min(799, cx + (box[2] - cx) * factor),
-                               min(599, cy + (box[3] - cy) * factor)]
-        for (model, width), group in preds.groupby(["model", "resolution_width"], sort=True):
-            for threshold in thresholds:
-                selected = group[group.conf >= threshold]
-                counts = {}
-                for image_path in paths:
-                    frame_preds = selected[selected.image_path.astype(str) == image_path].sort_values("conf", ascending=False)
-                    counts[image_path] = (frame_preds, scaled_gt[image_path])
-                tp = fp = fn = 0
-                for frame_preds, gt_box in counts.values():
-                    hits = [box_iou([r.x1, r.y1, r.x2, r.y2], gt_box) >= 0.5 for r in frame_preds.itertuples(index=False)]
-                    if any(hits):
-                        tp += 1
-                        fp += max(0, len(hits) - 1)
-                    else:
-                        fn += 1
-                        fp += len(hits)
-                precision = tp / (tp + fp) if tp + fp else 0.0
-                recall = tp / len(paths) if paths else 0.0
-                records.append({"model": model, "resolution_width": int(width), "conf_threshold": threshold,
-                                "reference_boxes": f"derived_scaled_{factor:.1f}", "ap50": ap50(scaled_gt, selected),
-                                "precision": precision, "recall": recall,
-                                "f1": 2 * precision * recall / (precision + recall) if precision + recall else 0.0,
-                                "tp": tp, "fp": fp, "fn": fn, "manual_images": len(paths)})
-    # A separate evaluation against adjudicated manual rectangles.
     for (model, width), group in preds.groupby(["model", "resolution_width"], sort=True):
+        ap = ap50(human_gt, group[group.conf >= args.ap_floor])
         for threshold in thresholds:
             selected = group[group.conf >= threshold]
             tp = fp = fn = 0
-            for image_path, gt_box in human_gt.items():
-                frame_preds = selected[selected.image_path.astype(str) == image_path].sort_values("conf", ascending=False)
-                hits = [box_iou([r.x1, r.y1, r.x2, r.y2], gt_box) >= 0.5 for r in frame_preds.itertuples(index=False)]
+            for key, gt_box in human_gt.items():
+                frame_preds = selected[selected.frame_key == key].sort_values("conf", ascending=False)
+                hits = [box_iou([r.x1, r.y1, r.x2, r.y2], gt_box) >= 0.5
+                        for r in frame_preds.itertuples(index=False)]
                 if any(hits):
                     tp += 1
                     fp += max(0, len(hits) - 1)
@@ -129,16 +122,38 @@ def main() -> None:
                     fp += len(hits)
             precision = tp / (tp + fp) if tp + fp else 0.0
             recall = tp / len(paths) if paths else 0.0
-            records.append({"model": model, "resolution_width": int(width), "conf_threshold": threshold,
-                            "reference_boxes": "manual_adjudicated", "ap50": ap50(human_gt, selected),
-                            "precision": precision, "recall": recall,
-                            "f1": 2 * precision * recall / (precision + recall) if precision + recall else 0.0,
-                            "tp": tp, "fp": fp, "fn": fn, "manual_images": len(paths)})
+            records.append({
+                "model": model,
+                "resolution_width": int(width),
+                "conf_threshold": threshold,
+                "ap50": ap,
+                "precision": precision,
+                "recall": recall,
+                "f1": 2 * precision * recall / (precision + recall) if precision + recall else 0.0,
+                "tp": tp,
+                "fp": fp,
+                "fn": fn,
+                "manual_images": len(paths),
+                "reference_boxes": "user_drawn_manual",
+            })
+
+    out = Path(args.out)
+    out.mkdir(parents=True, exist_ok=True)
     result = pd.DataFrame(records)
     result.to_csv(out / "manual_box_summary.csv", index=False)
-    stats = {"manual_images": len(paths), "derived_vs_manual_iou": box_audit.derived_human_iou.describe().to_dict(),
-             "models": sorted(preds.model.astype(str).unique().tolist()), "resolutions": sorted(preds.resolution_width.unique().tolist()),
-             "status": "computed_from_adjudicated_annotations_and_final_predictions"}
+    stats = {
+        "manual_images": len(paths),
+        "models": sorted(preds.model.astype(str).unique().tolist()),
+        "resolutions": sorted(int(v) for v in preds.resolution_width.unique()),
+        "confidence_thresholds": thresholds,
+        "ap_confidence_floor": args.ap_floor,
+        "status": "computed_from_user_confirmed_hand_drawn_annotations_and_final_predictions",
+    }
+    if agreement_rows:
+        agreement = pd.DataFrame(agreement_rows)
+        agreement.to_csv(out / "box_agreement_by_frame.csv", index=False)
+        stats["manual_vs_proxy_iou"] = agreement.manual_vs_proxy_iou.describe().to_dict()
+        stats["manual_vs_proxy_iou_ge_0_5"] = float((agreement.manual_vs_proxy_iou >= 0.5).mean())
     (out / "manual_box_summary.json").write_text(json.dumps(stats, indent=2), encoding="utf-8")
     print(json.dumps(stats, indent=2))
 
