@@ -1,0 +1,40 @@
+{
+  "status": "automated_detector_proposals_complete",
+  "human_annotation": false,
+  "paper_modified": false,
+  "occlusion": "assumed_none based on user-provided statement; not independently assessed",
+  "sample_count": 240,
+  "sample_seed": 391,
+  "sample_rule": "20 per test sequence x eye-distance size stratum; 4 sequences x 3 strata",
+  "target_box_rule": "largest detected face box in each frame; all detector boxes retained in CSV",
+  "model": "InsightFace buffalo_l / SCRFD-10GF detector only",
+  "weights": "InsightFace buffalo_l/det_10g.onnx (local path omitted)",
+  "weights_sha256": "5838f7fe053675b1c7a08b633df49e7af5495cee0493c7dcf6697200b85b5b91",
+  "license": "InsightFace public pretrained models: non-commercial research only",
+  "allowed_modules": [
+    "detection"
+  ],
+  "detector_threshold": 0.1,
+  "detector_input_size": [
+    640,
+    640
+  ],
+  "onnxruntime_providers_available": [
+    "TensorrtExecutionProvider",
+    "CUDAExecutionProvider",
+    "CPUExecutionProvider"
+  ],
+  "onnxruntime_execution_providers": [
+    "CPUExecutionProvider"
+  ],
+  "torch_cuda": true,
+  "inference_device": "CPU",
+  "available_gpu": "NVIDIA GeForce RTX 3050 Laptop GPU",
+  "images_with_detection": 240,
+  "images_without_detection": 0,
+  "mean_model_confidence": 0.8573811136186122,
+  "median_iou_with_landmark_proxy": 0.624292470141534,
+  "median_center_distance_px": 13.33317297376546,
+  "median_auto_to_proxy_area_ratio": 0.6461355461205637,
+  "completed_utc": "2026-11-15T07:44:35.145575+00:00"
+}

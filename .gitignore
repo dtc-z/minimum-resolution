@@ -1,31 +1,59 @@
-@'
-# Dataset đã giải nén
+# Extracted and materialized dataset images
 /chokepoint_data/extracted/
+/chokepoint_data/modeling/final_revision/dataset_yolo/
+/chokepoint_data/modeling/final_revision/dataset_scrfd/
+/chokepoint_data/modeling/yolo_face_dataset/
+/chokepoint_data/modeling/yolo_finetuned*_weights/
+/chokepoint_data/modeling/yolo_finetune*_runs/
 
-# Checkpoints và model weights
+# Local environments and caches
+.venv/
+venv/
+__pycache__/
+.ipynb_checkpoints/
+/chokepoint_data/modeling/final_revision/envs/
+*.cache
+
+# Model weights and engine files
 *.pt
 *.pth
 *.onnx
 *.engine
 
-# Kết quả huấn luyện và cache
-/runs/
-/chokepoint_data/modeling/yolo_face_dataset/
-/chokepoint_data/modeling/yolo_finetuned*_weights/
-/chokepoint_data/modeling/yolo_finetune*_runs/
-*.cache
-
-# File lớn đã phát hiện khi quét
+# Large raw benchmark predictions
+/chokepoint_data/modeling/final_revision/benchmark/predictions.csv.gz
+/chokepoint_data/modeling/final_revision/benchmark/
+/chokepoint_data/modeling/final_revision/benchmark_dev_provisional/
+/chokepoint_data/modeling/final_revision/checkpoints/
+/chokepoint_data/modeling/final_revision/logs/
+/chokepoint_data/modeling/final_revision/source/
+/chokepoint_data/modeling/final_revision/manifests/train.csv
+/chokepoint_data/modeling/final_revision/manifests/dev.csv
+/chokepoint_data/modeling/final_revision/manifests/test.csv
+/chokepoint_data/modeling/final_revision/checkpoints/yolo_runs/
 /results.zip
 /chokepoint_data/modeling/benchmark_full_eval_gpu_yolo_both_scrfd_predictions_sample5676.csv
 /chokepoint_data/modeling/benchmark_*_predictions_*.csv
 
-# Log
-*.log
+# Training runs and generated local images
+/runs/
+/final/automated_audit/model_output/overlays/
+/final/automated_audit/model_output/contact_sheets/
 
-# Môi trường và file tạm
-.venv/
-venv/
-__pycache__/
-.ipynb_checkpoints/
-'@ | Set-Content -Encoding utf8 .gitignore
+# Local audit CSVs contain absolute image paths; keep the aggregate summary instead
+/final/automated_audit/sample.csv
+/final/automated_audit/model_output/model_proposals.csv
+/chokepoint_data/modeling/final_revision/manual_box_audit/screening_pool.csv
+/chokepoint_data/modeling/final_revision/manual_box_audit/pilot_sequence_size_sample.csv
+
+# Build Tools bootstrapper is an installer, not project source
+/tools/vs_buildtools.exe
+
+# Superseded/local duplicate outputs
+/docs/Paper_Improved_Final.docx
+/docs/Paper_Improved_Provisional.docx
+/docs/IEEE_Conference_Template_A4_2024.docx
+/docs/IEEE_Conference_Template_A4_2024_python_compatible.docx
+
+# Logs and temporary files
+*.log

@@ -1,0 +1,11 @@
+﻿{
+    "canonical_summary":  "../benchmark/summary.csv",
+    "canonical_summary_sha256":  "63c1ae329a549b5939c3b098d77f2a5861b38e3b2a21c9d18bd3b7e2e5a7edb7",
+    "operating_point_file":  "../benchmark/operating_point_dev_locked.json",
+    "figures":  [
+                    "fig01_accuracy_by_resolution.pdf",
+                    "fig02_throughput_by_resolution.pdf",
+                    "fig03_threshold_sensitivity.pdf"
+                ],
+    "labels":  "eye-landmark-derived proxy boxes; manual audit has to be reported separately"
+}

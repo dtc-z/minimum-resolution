@@ -1,0 +1,85 @@
+{
+  "started_utc": "2026-11-15T04:46:39.944013+00:00",
+  "protocol": "chokepoint_data\\modeling\\final_revision\\config\\final_protocol.yaml",
+  "protocol_sha256": "24eb3d389bb710557b8414a4e4f879aefef6c7096259a0e570650608b6daa395",
+  "dev_manifest": "chokepoint_data\\modeling\\final_revision\\manifests\\dev.csv",
+  "dev_manifest_sha256": "6ea76137561288e5e498364e3f40e55fee28e9819fbd5ccab880d394092ebbe5",
+  "test_manifest": "chokepoint_data\\modeling\\final_revision\\manifests\\test.csv",
+  "device": "NVIDIA GeForce RTX 3050 Laptop GPU",
+  "torch": "2.1.2",
+  "torch_cuda": "12.1",
+  "ultralytics": "8.4.54",
+  "mmcv": "1.7.2",
+  "mmdet": "2.7.0",
+  "opencv": "4.11.0",
+  "models": {
+    "YOLOv5nu-FT": {
+      "weights": "chokepoint_data\\modeling\\final_revision\\checkpoints\\yolo\\yolov5nu_face.pt",
+      "weights_sha256": "d3ebb29d91826862e9f1d07601c020995b26992561ee6ee6aa232ea7a9d3b778"
+    },
+    "YOLOv8n-FT": {
+      "weights": "chokepoint_data\\modeling\\final_revision\\checkpoints\\yolo\\yolov8n_face.pt",
+      "weights_sha256": "2b16ac97d9c974e60b109f2033dd6827897a48c0ef96250d73d201a1b272d248"
+    },
+    "YOLOv12n-FT": {
+      "weights": "chokepoint_data\\modeling\\final_revision\\checkpoints\\yolo\\yolov12n_face.pt",
+      "weights_sha256": "a2c4072bd9f37aeeade331e70838f17e4d929faaa8bed8a0e4581650df6fbebc"
+    },
+    "SCRFD-500M-FT": {
+      "weights": "chokepoint_data\\modeling\\final_revision\\checkpoints\\scrfd\\best_mAP.pth",
+      "weights_sha256": "64fd8d6d1010a93d89b46f0c64cc9f665d2f26fb05613c587ee43a9b9d50bc23"
+    }
+  },
+  "dev_only": false,
+  "resolutions_width": [
+    640,
+    480,
+    384,
+    320,
+    288,
+    256,
+    240,
+    192,
+    160,
+    128
+  ],
+  "thresholds": [
+    0.25,
+    0.35,
+    0.45,
+    0.55,
+    0.65,
+    0.7
+  ],
+  "confidence_floor": 0.001,
+  "nms_iou": 0.5,
+  "metric_iou": 0.5,
+  "selection": {
+    "confidence": 0.25,
+    "minimum_ap50": 0.95,
+    "minimum_recall": 0.95,
+    "rule": "Among candidates satisfying both dev thresholds, choose the smallest input width; ties rank by higher dev AP50, then higher dev recall, then fixed model-key order. No eligible candidate yields no recommendation."
+  },
+  "speed": {
+    "sample_seed": 391,
+    "frames_per_test_sequence": 150,
+    "sample_count": 600,
+    "warmup_iterations": 50,
+    "repeats": 5,
+    "timed_region": "OpenCV image read, framework preprocessing/resize, detector inference, and model postprocessing; model load and metric calculation excluded"
+  },
+  "notes": [
+    "Accuracy labels are eye-landmark-derived proxy boxes, not manually annotated face rectangles.",
+    "The test manifest is not read until dev candidate metrics and the operating point file have been written.",
+    "Speed sample comes from test frames but uses no ground-truth labels and does not select a model or threshold.",
+    "Framework-native resize/letterbox is used; YOLO and SCRFD retain model-specific native transforms, with a common target maximum size and common NMS IoU threshold."
+  ],
+  "scrfd_config": "chokepoint_data\\modeling\\final_revision\\config\\scrfd_500m_p1.py",
+  "scrfd_config_sha256": "8d4f751fe24b788d8d384bcf27d6a0bc749ed35c4330ddde4001d8741070eb81",
+  "test_manifest_sha256": "5806b209340f8828e0c2e571fcb56f8be4808cad97723b9bdd83e67cf8b82e01",
+  "finished_utc": "2026-11-15T06:42:20.009767+00:00",
+  "test_image_count": 5676,
+  "test_prediction_rows": 15618557,
+  "test_summary_sha256": "63c1ae329a549b5939c3b098d77f2a5861b38e3b2a21c9d18bd3b7e2e5a7edb7",
+  "predictions_sha256": "c51189ce9e632f003cc0d16b20a4d96d121e3ac383555a8724fbb79d0e85ad0d"
+}

@@ -1,0 +1,4 @@
+split,instances,sequences,missing_images
+train,4900,3,0
+dev,1135,1,0
+test,5676,4,0

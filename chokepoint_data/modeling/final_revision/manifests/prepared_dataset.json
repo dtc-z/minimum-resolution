@@ -1,0 +1,43 @@
+{
+  "seed": 391,
+  "dev_sequence": "P1E_S2_C2",
+  "audit_manifest_sha256": "58ef2e34b615d2a54044aba1fb5c3ca85087eff69fad5feffe74c348c6a16592",
+  "test_used_for_training_or_selection": false,
+  "materialized": true,
+  "copy_fallback_enabled": true,
+  "splits": {
+    "train": {
+      "instances": 4900,
+      "sequences": [
+        "P1E_S1_C1",
+        "P1L_S1_C1",
+        "P1L_S2_C2"
+      ],
+      "manifest": "chokepoint_data\\modeling\\final_revision\\manifests\\train.csv",
+      "hardlink": 4900,
+      "copy": 0
+    },
+    "dev": {
+      "instances": 1135,
+      "sequences": [
+        "P1E_S2_C2"
+      ],
+      "manifest": "chokepoint_data\\modeling\\final_revision\\manifests\\dev.csv",
+      "hardlink": 1135,
+      "copy": 0
+    },
+    "test": {
+      "instances": 5676,
+      "sequences": [
+        "P1E_S3_C3",
+        "P1E_S4_C1",
+        "P1L_S3_C3",
+        "P1L_S4_C1"
+      ],
+      "manifest": "chokepoint_data\\modeling\\final_revision\\manifests\\test.csv",
+      "hardlink": 5676,
+      "copy": 0
+    }
+  },
+  "yolo_yaml": "chokepoint_data/modeling/final_revision/dataset_yolo/chokepoint_face.yaml"
+}

@@ -1,0 +1,9 @@
+final_split,dataset,instances
+dev,P1E_S2_C2,1135
+test,P1E_S3_C3,929
+test,P1E_S4_C1,1531
+test,P1L_S3_C3,1205
+test,P1L_S4_C1,2011
+train,P1E_S1_C1,1382
+train,P1L_S1_C1,1799
+train,P1L_S2_C2,1719

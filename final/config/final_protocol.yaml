@@ -1,0 +1,63 @@
+protocol_version: 1
+status: yolo_training_complete_scrfd_training_in_progress
+scope: ChokePoint Portal 1 indoor frontal; detector-level evaluation only
+seed: 391
+source_manifest: chokepoint_data/modeling/chokepoint_p1_indoor_frontal_manifest.csv
+grouping_unit: dataset_sequence
+split:
+  train_sequences: [P1E_S1_C1, P1L_S1_C1, P1L_S2_C2]
+  dev_sequences: [P1E_S2_C2]
+  test_sequences: [P1E_S3_C3, P1E_S4_C1, P1L_S3_C3, P1L_S4_C1]
+  train_instances_expected: 4900
+  dev_instances_expected: 1135
+  test_instances_expected: 5676
+  test_available_to_training_or_checkpoint_selection: false
+  selection_rule: choose checkpoint and deployment operating point using train/dev only
+labels:
+  source: eye_landmark_derived_box
+  formula: "x1/x2=cx +/- 1.4d; y1=cy-1.2d; y2=cy+2.4d; clip to source image bounds"
+  source_image_size: [800, 600]
+  interpretation: derived proxy boxes, not human-annotated face rectangles
+models:
+  yolo: [yolov5nu, yolov8n, yolov12n]
+  yolo_name_note: Ultralytics updated-head YOLOv5nu checkpoint (yolov5nu.pt), referred to as the YOLOv5 nano-family variant
+  scrfd: fine_tuned_on_same_train_dev_split
+  yolo_initialization_provenance: logs/yolo_initial_weights_provenance.json
+  scrfd_initialization_provenance: logs/scrfd_checkpoint_provenance.json
+training:
+  epochs: 20
+  image_size: 640
+  batch_size: 8
+  workers: 0
+  optimizer: implementation_default_and_version_pinned
+  augmentations: record_exact_framework_defaults_or_overrides_in_run_config
+  checkpoint_selection: best validation metric on dev; test excluded
+  note: YOLOv5nu, YOLOv8n, and YOLOv12n completed 20 epochs; MSVC and Windows SDK are installed and SCRFD train/dev fine-tuning is running. Test evaluation remains unopened.
+evaluation:
+  widths: [640, 480, 384, 320, 288, 256, 240, 192, 160, 128]
+  thresholds: [0.25, 0.35, 0.45, 0.55, 0.65, 0.70]
+  iou: 0.5
+  primary_metrics: [AP50_vs_derived_eye_landmark_boxes, recall, precision, F1, FP, FN]
+  resolution_policy: preserve_aspect_ratio_from_800x600
+  operating_point_rule: "select on dev only; confidence 0.25; require AP50 >= 0.95 and recall >= 0.95"
+speed:
+  sample_seed: 391
+  frames_per_test_sequence: 150
+  warmup_iterations: 50
+  repeats: 5
+  statistic: median_and_IQR
+  timed_region: image_read_resize_detector_and_model_postprocessing
+  exclude: [model_loading, metric_calculation]
+  device_and_provider: same_GPU_and_execution_provider_for_all_models
+manual_box_audit:
+  target_instances: 240
+  candidate_pool: 360
+  candidate_sampling: 90_per_test_sequence_balanced_by_eye_distance_tertiles
+  final_stratification: [test_sequence, eye_distance_px_tertiles, human_assessed_occlusion]
+  double_annotated_fraction: 0.2
+  status: candidate_sampler_and_finalizer_prepared; human_annotation_pending
+artifacts:
+  provisional_yolo_dev_summary: chokepoint_data/modeling/final_revision/benchmark_dev_provisional/dev_summary.csv
+  canonical_summary: chokepoint_data/modeling/final_revision/benchmark/summary.csv
+  predictions: chokepoint_data/modeling/final_revision/benchmark/predictions.csv.gz
+  figures_from_canonical_summary_only: true

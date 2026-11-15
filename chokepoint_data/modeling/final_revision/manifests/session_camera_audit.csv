@@ -1,0 +1,6 @@
+final_split,session,camera,instances
+dev,S2,C2,1135
+test,S3,C3,2134
+test,S4,C1,3542
+train,S1,C1,3181
+train,S2,C2,1719

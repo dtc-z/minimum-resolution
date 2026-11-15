@@ -1,0 +1,64 @@
+{
+  "status": "passed",
+  "source_manifest": "chokepoint_data/modeling/chokepoint_p1_indoor_frontal_manifest.csv",
+  "source_manifest_sha256": "58ef2e34b615d2a54044aba1fb5c3ca85087eff69fad5feffe74c348c6a16592",
+  "rows": 11711,
+  "dev_sequence": "P1E_S2_C2",
+  "train_sequences": [
+    "P1E_S1_C1",
+    "P1L_S1_C1",
+    "P1L_S2_C2"
+  ],
+  "dev_sequences": [
+    "P1E_S2_C2"
+  ],
+  "test_sequences": [
+    "P1E_S3_C3",
+    "P1E_S4_C1",
+    "P1L_S3_C3",
+    "P1L_S4_C1"
+  ],
+  "counts": {
+    "dev": {
+      "instances": 1135,
+      "sequences": 1
+    },
+    "test": {
+      "instances": 5676,
+      "sequences": 4
+    },
+    "train": {
+      "instances": 4900,
+      "sequences": 3
+    }
+  },
+  "duplicate_image_path_rows": 0,
+  "duplicate_dataset_frame_rows": 0,
+  "mixed_source_sequences": [],
+  "missing_images_claimed_present": 0,
+  "image_check_mode": "materialized_dataset_hardlinks",
+  "files_present_but_has_image_false": 0,
+  "adjacent_cross_split_frame_pairs": [],
+  "session_camera_identifier_overlaps": {
+    "train_vs_dev": {
+      "session": [
+        "S2"
+      ],
+      "camera": [
+        "C2"
+      ]
+    },
+    "train_vs_test": {
+      "session": [],
+      "camera": [
+        "C1"
+      ]
+    },
+    "dev_vs_test": {
+      "session": [],
+      "camera": []
+    }
+  },
+  "interpretation": "Session/camera identifiers are reported, not treated as leakage by themselves; sequence and frame identity are the grouping/audit units.",
+  "test_policy": "All source eval sequences map to test and are excluded from train/dev and checkpoint selection."
+}

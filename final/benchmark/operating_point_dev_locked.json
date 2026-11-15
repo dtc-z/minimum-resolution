@@ -1,0 +1,14 @@
+{
+  "status": "selected_from_dev_before_test",
+  "selected_model": "YOLOv8n-FT",
+  "selected_width": 288,
+  "selected_height": 216,
+  "confidence": 0.25,
+  "dev_ap50_vs_derived_boxes": 0.9900902090209021,
+  "dev_precision": 1.0,
+  "dev_recall": 0.9629955947136564,
+  "dev_f1": 0.9811490125673249,
+  "minimum_ap50": 0.95,
+  "minimum_recall": 0.95,
+  "locked_utc": "2026-11-15T04:59:43.954825+00:00"
+}
